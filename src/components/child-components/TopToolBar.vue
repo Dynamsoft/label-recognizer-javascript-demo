@@ -288,7 +288,7 @@ export default defineComponent({
                     <div class="logo" onClick={closeList}>
                         <span>{runtimeMode.value === 'video-mrz' ? 'MRZ Scanner' : runtimeMode.value.substring(6).toUpperCase()}</span>
                     </div>
-                    <a href="https://www.dynamsoft.com" target="_blank" class="getCode">
+                    <a href="https://github.com/Dynamsoft/label-recognizer-javascript-demo" target="_blank" class="getCode">
                         GET SOURCE CODE
                         <svg xmlns="http://www.w3.org/2000/svg" width="14.003" height="14.003" viewBox="0 0 14.003 14.003" class="download-icon">
                             <g id="Internet-Networks-Servers_Upload_Download_download-circle" data-name="Internet-Networks-Servers / Upload/Download / download-circle" transform="translate(-519.5 -1341.5)">
