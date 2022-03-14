@@ -1,0 +1,34 @@
+{
+  "name": "dlrjs-demo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^6.0.1",
+    "ant-design-vue": "^2.2.8",
+    "babel-plugin-import": "^1.13.3",
+    "clipboard": "2.0.8",
+    "core-js": "^3.6.5",
+    "dynamsoft-camera-enhancer": "2.0.3",
+    "dynamsoft-label-recognizer": "2.2.2",
+    "prerender-spa-plugin": "^3.4.0",
+    "vue": "^3.0.0",
+    "vue-loader-v16": "^16.0.0-beta.5.4"
+  },
+  "devDependencies": {
+    "@vue/babel-plugin-jsx": "^1.1.1",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.4.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "compression-webpack-plugin": "5.0.1",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "typescript": "~4.1.5",
+    "uglifyjs-webpack-plugin": "2.2.0",
+    "webpack-bundle-analyzer": "4.4.2"
+  }
+}
