@@ -1,4 +1,4 @@
-# demo
+# label-recognizer-javascript-demo
 
 ## Project setup
 ```
