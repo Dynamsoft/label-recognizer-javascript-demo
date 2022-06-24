@@ -1,32 +1,28 @@
 <script lang="tsx">
-import { defineComponent, ref, inject, Ref } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { CheckOutlined } from '@ant-design/icons-vue';
 import Header from './Header.vue';
 import Footer from './Footer.vue';
+import { useRouter } from "vue-router";
 
 export default defineComponent({
     setup() {
-        const selected = ref('video-mrz');
-        
-        const isShowHomePage = inject('isShowHomePage') as Ref<boolean>
-        const runtimeMode = inject('runtimeMode') as Ref<string>;
+        const selected = ref('mrz');
+        const router = useRouter();
 
         // Select the operation mode and go to the recognition page
         // if PC, when choose a mode, enter directly.
         // if mobile, when choose a mode, need click `START SCAN` btn to enter.
         const startScan = (isBtn: boolean, mode?: string): any => {
             if((window as any).document.body.clientWidth >= 980 || isBtn) {
-                if('' === selected.value) {
-                    alert("You haven't chosen any model yet!")
-                    return;
-                }
                 if(mode) {
-                    runtimeMode.value = mode;
+                    const url = (mode === 'mrz') ? 'mrz-scanner.html' : 'vin.html'
+                    router.push(url)
                 } 
                 else {
-                    runtimeMode.value = selected.value;
+                    const url = (selected.value === 'mrz') ? 'mrz-scanner.html' : 'vin.html';
+                    router.push(url);
                 }
-                isShowHomePage.value = false;
             }
         }
 
@@ -84,11 +80,11 @@ export default defineComponent({
                         </div> 
                         <div class="choices">
                             <div class="toolTip">To try the library, select a mode below and start scannning</div>
-                            <div class="passport-mrz" style={{border: (selected.value == 'video-mrz')?"1px solid #FE8E14":"1px solid #323234"}} onClick={ ()=>{startScan(false, 'video-mrz')} }>
+                            <div class="passport-mrz" style={{border: (selected.value == 'mrz')?"1px solid #FE8E14":"1px solid #323234"}} onClick={ ()=>{startScan(false, 'mrz')} }>
                                 <input type="radio"
                                     name="mode"
                                     id="passport-mrz"
-                                    value="video-mrz" 
+                                    value="mrz" 
                                     v-model={selected.value}
                                 />
                                 <label for="passport-mrz">
@@ -133,17 +129,17 @@ export default defineComponent({
                                         </svg>
                                     </div>
                                     <div class="choice-right" style="margin-top: -50px">
-                                        <div class="circle" style={{backgroundColor: (selected.value == 'video-mrz')?"#FE8E14":"#F5F5F5"}}>
+                                        <div class="circle" style={{backgroundColor: (selected.value == 'mrz')?"#FE8E14":"#F5F5F5"}}>
                                             <CheckOutlined style="font-size: 12px"/>
                                         </div>
                                     </div>
                                 </label>
                             </div>
-                            <div class="vin" style={{border: (selected.value == 'video-vin')?"1px solid #FE8E14":"1px solid #323234"}} onClick={ ()=>startScan(false, 'video-vin')}>            
+                            <div class="vin" style={{border: (selected.value == 'vin')?"1px solid #FE8E14":"1px solid #323234"}} onClick={ ()=>startScan(false, 'vin')}>            
                                 <input type="radio"
                                     name="mode"
                                     id="vin"
-                                    value="video-vin" 
+                                    value="vin" 
                                     v-model={selected.value}
                                 />
                                 <label for="vin">
@@ -151,13 +147,13 @@ export default defineComponent({
                                         VIN<span class="vin-text" style="margin-left: 7px;">(Vehicle Identification Number)</span>
                                     </div>
                                     <div class="choice-right">
-                                        <div class="circle" style={{backgroundColor: (selected.value == 'video-vin')?"#FE8E14":"#F5F5F5"}}>
+                                        <div class="circle" style={{backgroundColor: (selected.value == 'vin')?"#FE8E14":"#F5F5F5"}}>
                                             <CheckOutlined style="font-size: 12px"/>
                                         </div>
                                     </div>
                                 </label>
                             </div>
-                            <div class="number" style={{border: (selected.value == 'video-number')?"1px solid #FE8E14":"1px solid #323234"}}>            
+                            <div class="number" style={{border: (selected.value == 'number')?"1px solid #FE8E14":"1px solid #323234"}}>            
                                 <label for="number">
                                     <div class="modeName">
                                         <span>Number</span>
@@ -165,7 +161,7 @@ export default defineComponent({
                                     </div>
                                 </label>
                             </div>
-                            <div class="letter" style={{border: (selected.value == 'video-letter')?"1px solid #FE8E14":"1px solid #323234"}}>            
+                            <div class="letter" style={{border: (selected.value == 'letter')?"1px solid #FE8E14":"1px solid #323234"}}>            
                                 <label for="letter">
                                     <div class="modeName">
                                         <span>Letter</span>

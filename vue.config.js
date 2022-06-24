@@ -1,12 +1,9 @@
-const path = require('path');
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const PrerenderSPAPlugin = require('prerender-spa-plugin');
-const Renderer = PrerenderSPAPlugin.PuppeteerRenderer; 
 
 module.exports = {
-    publicPath: "./",
+    publicPath: process.env.VUE_APP_PUBLIC_PATH,//"./",
     configureWebpack: config=>{ 
         if(config.mode === "production"){
             config.devtool = false;
@@ -23,21 +20,6 @@ module.exports = {
                   generateStatsFile: false, 
                   deleteOriginalAssets: true
                 }),
-            );
-
-            config.plugins.push(
-                new PrerenderSPAPlugin({
-                    staticDir: path.join(__dirname, 'dist'),
-            
-                    routes: [ '/' ],
-                    renderer: new Renderer({
-                    inject: {
-                        foo: 'bar'
-                    },
-                    headless: true,
-                    renderAfterDocumentEvent: 'render-event'
-                    })
-                })
             );
             
             config.plugins.push(

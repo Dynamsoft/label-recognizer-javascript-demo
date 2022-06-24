@@ -4,6 +4,7 @@ import Clipboard from "clipboard";
 
 export default defineComponent ({
   setup() {
+    // const recognizer = inject('recognizer') as any;
     const runtimeMode = inject('runtimeMode') as Ref<string>;
     const recognizeResultInfo = inject('recognizeResultInfo') as any;
     const isShowNumOrLetResults = inject('isShowNumOrLetResults') as Ref<boolean>;
@@ -12,11 +13,14 @@ export default defineComponent ({
     const recognizerCount = ref(0);
     const { proxy }: any = getCurrentInstance();
     let timer: any;
+    let currentRes = '';
 
     watch(recognizeResultInfo, () => {
-      if(timer) {
-        clearTimeout(timer);
+      if(currentRes !== recognizeResultInfo.value[0]) {
+        recognizerCount.value = 0;
       }
+      currentRes = recognizeResultInfo.value[0];
+      timer && clearTimeout(timer);
       recognizerCount.value++;
       timer = setTimeout(() => {
         isShowNumOrLetResults.value = false;
@@ -51,7 +55,7 @@ export default defineComponent ({
 
     return () => (
       <div class="result">
-        <div class="title">{runtimeMode.value.substring(6).toUpperCase()} :</div>
+        <div class="title">{runtimeMode.value.toUpperCase()} :</div>
         <div class="content">
           {
             recognizeResultInfo.value.map((item: string) => {

@@ -1,8 +1,8 @@
 <script lang="tsx">
 import { defineComponent, provide, ref, Ref } from 'vue';
-import HomePage from './components/HomePage.vue';
-import RecognizerPage from './components/RecognizerPage.vue';
 import { LabelRecognizer } from 'dynamsoft-label-recognizer'
+import './dlr.ts'
+import './dce.ts'
 
 export default defineComponent({
   setup() {
@@ -12,33 +12,18 @@ export default defineComponent({
     const isShowImgRecognitionMask = ref(false) as Ref<boolean>;
     const progressRate = ref() as Ref<number>;
 
-    LabelRecognizer.loadWasm();
-
-    const getPathName = (): string => {
-      let pathname: string = location.hash;
-      pathname = pathname.substring(1);
-      return pathname;
-    }
-
-    (() => {
-      if(getPathName() === 'mrz') {
-        runtimeMode.value = 'video-mrz';
-        isShowHomePage.value = false;
-      } else if(getPathName() === 'vin') {
-        runtimeMode.value = 'video-vin';
-        isShowHomePage.value = false;
-      }
-    })();
-
     provide('isShowHomePage', isShowHomePage);
     provide('runtimeMode', runtimeMode);
     provide('isShowMask', isShowMask);
     provide('progressRate', progressRate);
     provide('isShowImgRecognitionMask', isShowImgRecognitionMask);
 
+    LabelRecognizer.loadWasm();
+
     return () => (
       <>
-        { isShowHomePage.value ? <HomePage /> : <RecognizerPage /> }
+        <router-view></router-view>
+        { /* isShowHomePage.value ? <HomePage /> : <RecognizerPage /> */ }
         <div class="dataLoadingMask" v-show={isShowMask.value}>
           <div>Model Loading......</div>
           <progress class="loadProgress" value={progressRate.value} max={100}></progress>
@@ -75,6 +60,7 @@ html, body {
   overflow: hidden;
   width: 100%;
   height: 100%;
+  min-width: 300px;
 }
 #app {
   display: flex;
@@ -87,17 +73,11 @@ html, body {
   color: #2c3e50;
   background-color: rgb(50,50,52);
 }
+ul {
+  margin-bottom: 0;
+}
 li {
   list-style: none;
-}
-.dce-video, .dlr-cvs-drawarea {
-  object-fit: cover !important;
-}
-.dlr-scanlight {
-  border-radius: 50%;
-  box-shadow: #fe8e14 0px 0px 1px 2px !important;
-  background-color: #fe8e14 !important;
-  height: 1% !important;
 }
 .dataLoadingMask progress { 
   -webkit-appearance: none; 
@@ -125,5 +105,54 @@ li {
   z-index: 9999;
   font-size: 30px;
   color: white;
+}
+.ant-popover-inner-content {
+  padding: 0;
+  .camera-list, .imgRecognizerMethod, .modeList {
+    color: #AAAAAA;
+    opacity: 0.9;
+    li {
+        height: 50px;
+        line-height: 50px;
+        background-color: #222222;
+        text-align: center;
+        cursor: pointer;
+        div {
+          padding: 0 10px;
+        }
+    }
+  }
+}
+.ant-spin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+.ant-popover-placement-bottom > .ant-popover-content > .ant-popover-arrow, .ant-popover-placement-bottomLeft > .ant-popover-content > .ant-popover-arrow, .ant-popover-placement-bottomRight > .ant-popover-content > .ant-popover-arrow {
+  border-top-color: rgb(34,34,34);
+  border-left-color: rgb(34,34,34);
+}
+
+@media screen and (min-width: 980px) {
+  .ant-dropdown  {
+    top: 70px !important;
+  }
+}
+
+@media screen and (max-width: 980px) {
+  .ant-dropdown  {
+    top: 46px !important;
+  }
+  .ant-popover-inner-content {
+    .camera-list {
+      li {
+        height: 35px;
+        line-height: 35px;
+      }
+    }
+    
+  }
 }
 </style>

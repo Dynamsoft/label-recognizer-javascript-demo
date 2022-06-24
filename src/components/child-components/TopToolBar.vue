@@ -1,44 +1,57 @@
 <script lang="tsx">
 import { defineComponent, inject, ref, getCurrentInstance, Ref, watchEffect } from 'vue';
-// import DLR from '../../dlr';
-
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
+import { DownOutlined, MobileOutlined, UpOutlined } from '@ant-design/icons-vue';
+import { useRouter } from "vue-router";
 export default defineComponent({
     setup() {
-        // const sampleImg = require('@/assets/sampleImg/passport.png');
+        const mrzSampleImg = require('@/assets/sampleImg/passport.png');
+        const vinSampleImg = require('@/assets/sampleImg/vin.png');
         const { proxy } = getCurrentInstance() as any;
-
         const cameraList = inject('cameraList') as any;
         const recognizer = inject('recognizer') as any;
-        // const isShowStaticImg = inject('isShowStaticImg') as Ref<boolean>;
+        const cameraEnhancer = inject('cameraEnhancer') as any;
+        const isShowStaticImg = inject('isShowStaticImg') as Ref<boolean>;
         const isShowResults = inject('isShowResults') as Ref<boolean>;
-        // const recognizeResultInfo = inject('recognizeResultInfo') as Ref<string[]>;
-        // const recognizeImg = inject('recognizeImg') as Ref<any>;
-        // const recognizeImgInfo = inject('recognizeImgInfo') as Ref<any>;
+        const recognizeResultInfo = inject('recognizeResultInfo') as Ref<string[]>;
+        const recognizeImg = inject('recognizeImg') as Ref<any>;
+        const recognizeImgInfo = inject('recognizeImgInfo') as Ref<any>;
         const isShowCameraList = inject('isShowCameraList') as Ref<boolean>;
         const isShowModeList = inject('isShowModeList') as Ref<boolean>;
         const isShowSettingList = inject('isShowSettingList') as Ref<boolean>;
         const runtimeMode = inject('runtimeMode') as Ref<string>;
-        const isPlaySound = inject('isPlaySound') as Ref<boolean>;
-        // const isShowImgRecognitionMask = inject('isShowImgRecognitionMask') as Ref<any>;
+        const isShowImgRecognitionMask = inject('isShowImgRecognitionMask') as Ref<any>;
         const isShowImgRecMethodList = inject('isShowImgRecMethodList') as Ref<boolean>;
-
+        const isShowNumOrLetResults = inject('isShowNumOrLetResults') as Ref<boolean>;
+        const isNeedPlaySound = inject('isNeedPlaySound') as Ref<boolean>;
+        const cameraIsExists = inject('cameraIsExists') as any;
+        const setRegion = inject('setRegion') as any;
+        const isShowScanningPrompt = inject('isShowScanningPrompt') as Ref<boolean>;
         const cameraSelected = ref();
         const cameraLabel = ref('');
-
+        const placement = ref(document.body.clientWidth > 980 ? 'top' : 'topLeft');
+        const router = useRouter();
+        let timer: any;
+        window.addEventListener('resize', () => {
+            if(document.body.clientWidth > 980) {
+                placement.value = 'bottom';
+            } else {
+                placement.value = 'bottomLeft';
+            }
+        })
         watchEffect(async() => {
             const r = recognizer.value;
-            if(r && r.cameraEnhancer && r.cameraEnhancer._currentCamera){
-                const current = await recognizer.value.cameraEnhancer.getSelectedCamera();
+            if(r && r.dce && r.dce._currentCamera){
+                const current = await cameraEnhancer.value.getSelectedCamera();
                 cameraSelected.value = current;
                 cameraLabel.value = current.label;
             }
         })
-
         // Local upload image recognition
-        /* const uploadImg = async (event: any) => {
-            const imgRecognizer = await DLR.createInstance({runtimeSettings: runtimeMode.value.substring(6)});
+        const uploadImg = async (event: any) => {
+            const imgRecognizer = await LabelRecognizer.createInstance({runtimeSettings: runtimeMode.value});
             try{
-                recognizer.value.pauseScanning();
+                cameraIsExists.value ? recognizer.value.pauseScanning() : null;
                 isShowResults.value = false;
                 isShowImgRecMethodList.value = false;
                 let files = event.target.files;
@@ -60,179 +73,231 @@ export default defineComponent({
                     recognizeResultInfo.value = resultArr;
                     if(recognizeResults.length === 0) {
                         proxy.$message.error('No Result Found!');
-                    } else if(runtimeMode.value === "video-mrz" && recognizeResultInfo.value.length >= 2) {
-                        if(recognizeResultInfo.value[0].length === 30) {
-                            if(recognizeResultInfo.value.length !== 3) {
-                                return proxy.$message.error('No Result Found!');
-                            } else {
-                                isShowStaticImg.value = true;
-                            }
-                        } else {
-                            isShowStaticImg.value = true;
-                        }
-                    } else if(runtimeMode.value !== "video-mrz") {
+                    } else {
                         isShowStaticImg.value = true;
+                        isShowNumOrLetResults.value = false;
                     }
                 }
             } catch(ex: any) {
-                recognizer.value.resumeScanning();
+                cameraIsExists.value ? recognizer.value.resumeScanning() : null;
                 proxy.$message.error('No recognizable content found!');
             }
             imgRecognizer.destroyContext();
         };
-
         const loadSampleImg = async () => {
-            const imgRecognizer = await DLR.createInstance({runtimeSettings: 'mrz'});
+            const imgRecognizer = await LabelRecognizer.createInstance({runtimeSettings: runtimeMode.value});
             try {
                 isShowResults.value = false;
-                recognizer.value.pauseScanning();
+                cameraIsExists.value ? recognizer.value.pauseScanning() : null;
                 const image = new Image();
                 await new Promise((rs,rj)=>{
                     image.onload = rs;
                     image.onerror = rj;
-                    image.src = sampleImg;
+                    image.src = runtimeMode.value === 'mrz' ? mrzSampleImg : vinSampleImg;
                 });
                 recognizeImgInfo.value = {name: 'Sample Img'} as any;
-                recognizeImg.value = sampleImg
+                recognizeImg.value = runtimeMode.value === 'mrz' ? mrzSampleImg : vinSampleImg;
                 isShowImgRecognitionMask.value = true;
                 let result = await imgRecognizer.recognize(image);
                 isShowImgRecognitionMask.value = false;
-
                 let resultArr: Array<string> = [];
                 result[0].lineResults.forEach((res: any) => {
                     resultArr.push(res.text);
                 })
                 recognizeResultInfo.value = resultArr;
                 isShowStaticImg.value = true;
+                isShowImgRecMethodList.value = false;
+                isShowNumOrLetResults.value = false;
             } catch(ex: any) {
-                recognizer.value.resumeScanning();
+                cameraIsExists.value ? recognizer.value.resumeScanning() : null;
                 proxy.$message.error(ex.message);
             }
             imgRecognizer.destroyContext();
-        } */
-
+        }
         const closeList = () => {
             isShowCameraList.value = false;
             isShowModeList.value = false;
             isShowSettingList.value = false;
             isShowImgRecMethodList.value = false;
         }
-
         const switchSoundIsPlay = () => {
             isShowCameraList.value = false;
             isShowModeList.value = false;
             isShowSettingList.value = false;
             isShowImgRecMethodList.value = false;
-            isPlaySound.value = !isPlaySound.value;
-            recognizer.value.whenToPlaySoundforSuccessfulRead = isPlaySound.value;
+            isNeedPlaySound.value = !isNeedPlaySound.value;
         }
-
         const switchCameraList = () => {
             isShowCameraList.value = !isShowCameraList.value;
             isShowModeList.value = false;
             isShowSettingList.value = false;
             isShowImgRecMethodList.value = false;
         }
-
-        /* const switchImgMethodList = () => {
+        const switchImgMethodList = () => {
             isShowImgRecMethodList.value = !isShowImgRecMethodList.value;
             isShowModeList.value = false;
             isShowSettingList.value = false;
             isShowCameraList.value = false;
-        } */
-
+        }
+        const switchModeList = (e: any) => {
+            e.stopPropagation();
+            isShowModeList.value = !isShowModeList.value;
+            isShowCameraList.value = false;
+            isShowImgRecMethodList.value = false;
+        }
         const changeCamera = async (info: any) => {
             isShowCameraList.value = false;
             isShowResults.value = false;
-            await recognizer.value.cameraEnhancer.selectCamera(info);
+            await cameraEnhancer.value.selectCamera(info);
             recognizer.value.resumeScanning();
             proxy.$message.success(`Switched to ${cameraSelected.value.label} successfully!`);
         }
-
         const goToChat = () => {
             location.href = 'https://support.dynamsoft.com/LiveChatServer/chatwindowmobile.aspx?planId=5000110&siteId=10008&dynamic=false&pageTitle=Barcode%20Reader%20JavaScript%20Demo%20%7C%20Dynamsoft&pageUrl=https%3A%2F%2Fdemo.dynamsoft.com%2Fbarcode-reader-js%2F&newurl=1&r=4&embInv=0&dirChat=0&guid=&chatGroup='
         }
-
+        const formatModeName = (str: string) => {
+            if(str === 'vin') {
+                return 'VIN (beta)'
+            } else {
+                return str.replace(str[0], str[0].toUpperCase())
+            }
+        }
+        const cameraMenu = () => {
+            return <ul class="camera-list" /* v-show={isShowCameraList.value && cameraList.value} */>
+                        {
+                            cameraList.value.length ? 
+                            cameraList.value.map((item: any) => {
+                                return <li style={{color: (cameraSelected.value && item && cameraSelected.value.deviceId === item.deviceId) ? "#FE8E14" : "white", backgroundColor: (cameraSelected.value && item && cameraSelected.value.deviceId === item.deviceId) ? "#181717" : ""}} onClick={()=>{changeCamera(item)}}><div>{ item.label }</div></li>
+                            }) : <li style={{color: "white", width: "150px"}}><div>{cameraIsExists.value ? 'Loading...' : 'No found camera'}</div></li>
+                        }
+                    </ul>
+        }
+        const updateLoadImgMenu = () => {
+            return  <ul class="imgRecognizerMethod">
+                        {
+                            <><li onClick={loadSampleImg}><div>Load Sample Image</div></li>
+                            <label for="imgUpload"><li><div>Upload from Local</div></li></label>
+                            <input type="file" accept="image/*" id="imgUpload" onChange={uploadImg} style={{ display: "none" }}/></>
+                        }
+                    </ul>
+        }
+        const modeList = () => {
+            return <ul class="modeList">
+                        {
+                            <><li style={{ color: runtimeMode.value==="mrz"? "#fe8e14":'#aaaaaa' }} onClick={() => { changeMode("mrz"); } }><div>MRZ Scanner</div></li>
+                            <li style={{ color: runtimeMode.value==="vin"? "#fe8e14":'#aaaaaa' }} onClick={() => { changeMode("vin"); } }><div>VIN (bate)</div></li></>
+                        }
+                    </ul>
+        }
+        const changeMode = async (mode: any) => {
+            if(!cameraIsExists.value) {
+                runtimeMode.value = mode;
+            } else {
+                isShowNumOrLetResults.value = false;
+                if(recognizer.value) {
+                    isShowResults.value = false;
+                    runtimeMode.value = mode;
+                    recognizer.value.pauseScanning();
+                    await recognizer.value.updateRuntimeSettingsFromString(mode);
+                    setRegion();
+                    isShowScanningPrompt.value = true;
+                    if(timer) {
+                        clearTimeout(timer);
+                    }
+                    timer = setTimeout(() => {
+                        isShowScanningPrompt.value = false;
+                    }, 5000)   
+                    recognizer.value.resumeScanning();
+                    if(mode === 'mrz' && document.body.clientWidth < 980) {
+                        proxy.$message.open({
+                            content: 'Rotate your device',
+                            duration: 3,
+                            icon: <MobileOutlined spin style={{ color: "#FE8E14" }}/>
+                        });
+                    }
+                }
+            }
+            if(mode === 'mrz') {
+                router.push(`mrz-scanner.html`);
+            } else {
+                router.push(`vin.html`);
+            }
+            proxy.$message.success(`Switched to ${mode === 'mrz' ? 'MRZ Scanner' : formatModeName(mode) + ' mode'} successfully!`);
+            isShowModeList.value = false;
+        }
+        const modeListArrowIcon = () => {
+            if(isShowModeList.value) return <UpOutlined style={{fontSize: "17px", color: "rgb(170,170,170)", marginLeft: "7px"}}/>
+            return <DownOutlined style={{fontSize: "17px", color: "rgb(170,170,170)", marginLeft: "7px"}}/>
+        }
         return () => (
             <>
                 <div class="content">
                     <div class="function-choose">
-                        <div class="camera-area">
-                            <div class="camera-choose" onClick={switchCameraList}>
-                                <svg viewBox="0 0 29.308 17" class="cameraSvg">
-                                    <g transform="translate(-346.925 -627.702)">
-                                    <g transform="translate(347.425 628.202)">
-                                        <g>
-                                        <path
-                                            d="M365.791,644.2H348.656a1.231,1.231,0,0,1-1.231-1.231V629.433a1.231,1.231,0,0,1,1.231-1.231h16a1.231,1.231,0,0,1,1.231,1.231v14.733"
-                                            transform="translate(-347.425 -628.202)"
-                                            fill="none"
-                                            stroke="#aaa"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1"
-                                        />
-                                        <path
-                                            d="M371.81,640.606a1.23,1.23,0,0,1-1.781,1.1l-4.923-2.462a1.229,1.229,0,0,1-.681-1.1v-4.633a1.232,1.232,0,0,1,.681-1.1l4.923-2.462a1.231,1.231,0,0,1,1.781,1.1Z"
-                                            transform="translate(-343.502 -627.828)"
-                                            fill="none"
-                                            stroke="#aaa"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1"
-                                        />
+                        <a-popover visible={isShowCameraList.value} trigger="click" content={cameraMenu} color="rgb(34,34,34)" placement={placement.value} arrowPointAtCenter>
+                            <div class="camera-area">
+                                <div class="camera-choose" onClick={switchCameraList}>
+                                    <svg viewBox="0 0 29.308 17" class="cameraSvg">
+                                        <g transform="translate(-346.925 -627.702)">
+                                        <g transform="translate(347.425 628.202)">
+                                            <g>
+                                            <path
+                                                d="M365.791,644.2H348.656a1.231,1.231,0,0,1-1.231-1.231V629.433a1.231,1.231,0,0,1,1.231-1.231h16a1.231,1.231,0,0,1,1.231,1.231v14.733"
+                                                transform="translate(-347.425 -628.202)"
+                                                fill="none"
+                                                stroke="#aaa"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1"
+                                            />
+                                            <path
+                                                d="M371.81,640.606a1.23,1.23,0,0,1-1.781,1.1l-4.923-2.462a1.229,1.229,0,0,1-.681-1.1v-4.633a1.232,1.232,0,0,1,.681-1.1l4.923-2.462a1.231,1.231,0,0,1,1.781,1.1Z"
+                                                transform="translate(-343.502 -627.828)"
+                                                fill="none"
+                                                stroke="#aaa"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1"
+                                            />
+                                            </g>
                                         </g>
-                                    </g>
-                                    </g>
-                                </svg>
-                                <span>
-                                    <span class='camera-name' style="margin: 0 5px">{cameraLabel.value}</span>
-                                    <svg v-show={!isShowCameraList.value} id="arrow" width="15.3" height="7.07" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.412 4.978" style="margin-left: 3px; color: #AAAAAA; vertical-align: middle;">
-                                        <path id="arrow_grey_down" data-name="arrow grey down" d="M620.5,7015.91l3.485,3.484a.728.728,0,0,0,1.028,0l3.485-3.484" transform="translate(-619.793 -7015.203)" fill="none" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+                                        </g>
                                     </svg>
-                                    <svg v-show={isShowCameraList.value} style="margin-left: 3px; color: #AAAAAA; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="15.3" height="7.07" viewBox="0 0 9.412 4.978">
-                                        <path id="arrow_grey_up" data-name="arrow grey up" d="M620.5,7015.91l3.485,3.484a.728.728,0,0,0,1.028,0l3.485-3.484" transform="translate(629.204 7020.18) rotate(180)" fill="none" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
-                                    </svg>
-                                </span>
+                                    <span>
+                                        <span class='camera-name' style="margin: 0 5px">{cameraLabel.value}</span>
+                                        <svg v-show={!isShowCameraList.value} id="arrow" width="15.3" height="7.07" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.412 4.978" style="margin-left: 3px; color: #AAAAAA; vertical-align: middle;">
+                                            <path id="arrow_grey_down" data-name="arrow grey down" d="M620.5,7015.91l3.485,3.484a.728.728,0,0,0,1.028,0l3.485-3.484" transform="translate(-619.793 -7015.203)" fill="none" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+                                        </svg>
+                                        <svg v-show={isShowCameraList.value} style="margin-left: 3px; color: #AAAAAA; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="15.3" height="7.07" viewBox="0 0 9.412 4.978">
+                                            <path id="arrow_grey_up" data-name="arrow grey up" d="M620.5,7015.91l3.485,3.484a.728.728,0,0,0,1.028,0l3.485-3.484" transform="translate(629.204 7020.18) rotate(180)" fill="none" stroke="#aaa" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+                                        </svg>
+                                    </span>
+                                </div>
                             </div>
-                            <ul class="camera-list" v-show={isShowCameraList.value && cameraList.value}>
-                            {
-                                cameraList.value.map((item: any) => {
-                                    return <li style={{color: (cameraSelected.value && item && cameraSelected.value.deviceId === item.deviceId) ? "#FE8E14" : "white"}} onClick={()=>{changeCamera(item)}}>{ item.label }</li>
-                                })
-                            }
-                            </ul>
-                        </div>
-                        {
-                            // #region 
-                            // <div class="uploadImgLabel" onClick={switchImgMethodList}>
-                            //     <div class="img-upload">
-                            //         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" class="updateImgSvg">
-                            //             <g id="Images-Photography_Image-Files_image-file-add" data-name="Images-Photography / Image-Files / image-file-add" transform="translate(-376.074 -2192.76)">
-                            //                 <g id="Group_184" data-name="Group 184" transform="translate(377.074 2193.76)">
-                            //                 <g id="image-file-add">
-                            //                     <path id="Oval_118" data-name="Oval 118" d="M383.857,2204.325a2.782,2.782,0,1,0-2.783-2.782A2.782,2.782,0,0,0,383.857,2204.325Z" transform="translate(-375.509 -2191.804)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                     <path id="Shape_876" data-name="Shape 876" d="M392.657,2204.907l-.863-1.38a.7.7,0,0,0-1.18,0l-3.672,5.874-1.5-2.4a.7.7,0,0,0-1.18,0l-4.193,6.709h6.956" transform="translate(-375.9 -2190.066)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                     <path id="Shape_877" data-name="Shape 877" d="M390.987,2225.76H378.465a1.392,1.392,0,0,1-1.391-1.391v-29.217a1.392,1.392,0,0,1,1.391-1.391H396.96a1.394,1.394,0,0,1,.984.407l5.157,5.157a1.39,1.39,0,0,1,.408.984v5.973" transform="translate(-377.074 -2193.76)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                     <path id="Oval_119" data-name="Oval 119" d="M396.422,2221.456a8.348,8.348,0,1,0-8.348-8.348A8.347,8.347,0,0,0,396.422,2221.456Z" transform="translate(-372.77 -2189.456)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                     <path id="Shape_878" data-name="Shape 878" d="M394.074,2207.76v8.348" transform="translate(-370.422 -2188.282)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                     <path id="Shape_879" data-name="Shape 879" d="M399.422,2210.76h-8.348" transform="translate(-371.596 -2187.108)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                            //                 </g>
-                            //                 </g>
-                            //             </g>
-                            //         </svg>
-                            //         <input type="file" accept="image/*" id="imgUpload" onChange={ uploadImg }/>
-                            //     </div>
-                            //     <ul class="imgRecognizerMethod" v-show={isShowImgRecMethodList.value}>
-                            //         <li onClick={loadSampleImg}>Load Sample Image</li>
-                            //         <label for="imgUpload"><li>Upload from Local</li></label>
-                            //     </ul>
-                            // </div>
-                            // #endregion
-                        }
-                        <div class={{'sound': true, 'isPlaySound': isPlaySound.value}} style="cursor: pointer;" onClick={switchSoundIsPlay}>
+                        </a-popover>
+                        <a-popover visible={isShowImgRecMethodList.value} trigger="click" content={updateLoadImgMenu} color="rgb(34,34,34)" arrowPointAtCenter>
+                            <div class="uploadImgLabel" onClick={switchImgMethodList}>
+                                <div class="img-upload">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" class="updateImgSvg">
+                                        <g id="Images-Photography_Image-Files_image-file-add" data-name="Images-Photography / Image-Files / image-file-add" transform="translate(-376.074 -2192.76)">
+                                            <g id="Group_184" data-name="Group 184" transform="translate(377.074 2193.76)">
+                                            <g id="image-file-add">
+                                                <path id="Oval_118" data-name="Oval 118" d="M383.857,2204.325a2.782,2.782,0,1,0-2.783-2.782A2.782,2.782,0,0,0,383.857,2204.325Z" transform="translate(-375.509 -2191.804)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                                <path id="Shape_876" data-name="Shape 876" d="M392.657,2204.907l-.863-1.38a.7.7,0,0,0-1.18,0l-3.672,5.874-1.5-2.4a.7.7,0,0,0-1.18,0l-4.193,6.709h6.956" transform="translate(-375.9 -2190.066)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                                <path id="Shape_877" data-name="Shape 877" d="M390.987,2225.76H378.465a1.392,1.392,0,0,1-1.391-1.391v-29.217a1.392,1.392,0,0,1,1.391-1.391H396.96a1.394,1.394,0,0,1,.984.407l5.157,5.157a1.39,1.39,0,0,1,.408.984v5.973" transform="translate(-377.074 -2193.76)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                                <path id="Oval_119" data-name="Oval 119" d="M396.422,2221.456a8.348,8.348,0,1,0-8.348-8.348A8.347,8.347,0,0,0,396.422,2221.456Z" transform="translate(-372.77 -2189.456)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                                <path id="Shape_878" data-name="Shape 878" d="M394.074,2207.76v8.348" transform="translate(-370.422 -2188.282)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                                <path id="Shape_879" data-name="Shape 879" d="M399.422,2210.76h-8.348" transform="translate(-371.596 -2187.108)" fill="none" stroke="#ccc" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                            </g>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </a-popover>
+                        
+                        <div class={{'sound': true, 'isPlaySound': isNeedPlaySound.value}} style="cursor: pointer;" onClick={switchSoundIsPlay}>
                             <label style="cursor: pointer;">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="soundNotPlaySvg" viewBox="0 0 23.005 23.005" v-show={!isPlaySound.value}>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="soundNotPlaySvg" viewBox="0 0 23.005 23.005" v-show={!isNeedPlaySound.value}>
                                     <g id="Music-Audio_Playlists_playlist" data-name="Music-Audio / Playlists / playlist" transform="translate(-532.82 -2020.614)">
                                         <g id="Group_192" data-name="Group 192" transform="translate(531.004 2021.114)">
                                         <g id="playlist">
@@ -244,7 +309,7 @@ export default defineComponent({
                                         </g>
                                     </g>
                                 </svg>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="soundPlaySvg" viewBox="0 0 27.001 27.001" v-show={isPlaySound.value}>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="soundPlaySvg" viewBox="0 0 27.001 27.001" v-show={isNeedPlaySound.value}>
                                     <g id="Music-Audio_Playlists_playlist-check" data-name="Music-Audio / Playlists / playlist-check" transform="translate(-338.504 -1922.614)">
                                         <g id="Group_168" data-name="Group 168" transform="translate(339.004 1923.114)">
                                         <g id="playlist-check">
@@ -286,7 +351,11 @@ export default defineComponent({
                         </svg>
                     </div>
                     <div class="logo" onClick={closeList}>
-                        <span>{runtimeMode.value === 'video-mrz' ? 'MRZ Scanner' : runtimeMode.value.substring(6).toUpperCase()}</span>
+                        <div style={{height: '100%'}}>
+                            <a-popover visible={isShowModeList.value && document.body.clientWidth >= 980 } trigger="click" content={modeList} color="rgb(34,34,34)" arrowPointAtCenter>
+                                <div style={{cursor: "pointer"}} onClick={switchModeList}>{runtimeMode.value === 'mrz' ? 'MRZ Scanner' : runtimeMode.value.toUpperCase() + ' (beta)'}{modeListArrowIcon()}</div>
+                            </a-popover>
+                        </div>
                     </div>
                     <a href="https://github.com/Dynamsoft/label-recognizer-javascript-demo" target="_blank" class="getCode">
                         GET SOURCE CODE
@@ -320,6 +389,7 @@ export default defineComponent({
         margin: 0 auto;
         width: 100%;
         height: 46px;
+        min-width: 300px;
         background-color: rgba($color: #000000, $alpha: 0.5);
         .function-choose {
             position: relative;
@@ -347,19 +417,6 @@ export default defineComponent({
                     span {
                         display: flex;
                         align-items: center;
-                    }
-                }
-                .camera-list {
-                    position: absolute;
-                    top: 46px;
-                    color: #AAAAAA;
-                    opacity: 0.9;
-                    li {
-                        height: 50px;
-                        line-height: 50px;
-                        background-color: #222222;
-                        padding: 0 10px;
-                        cursor: pointer;
                     }
                 }
             }
@@ -409,7 +466,7 @@ export default defineComponent({
                 padding: 0 15px;
                 height: 100%;
                 &.isPlaySound {
-                    background-color: rgba(128,128,128, 0.5);
+                    background-color: rgba(110, 110, 110, 0.8);
                 }
                 &:hover {
                     background-color: rgba(110, 107, 107, 0.5);
@@ -434,8 +491,9 @@ export default defineComponent({
         }
         .logo {
             width: 100%;
-            line-height: 40px;
-            span {
+            height: 70px;
+            line-height: 70px;
+            div {
                 display: none;
             }
         }
@@ -448,7 +506,6 @@ export default defineComponent({
             }
         }
     }
-
     @media screen and (min-width: 980px) {
         .content {
             height: 70px;
@@ -460,9 +517,6 @@ export default defineComponent({
                     .cameraSvg {
                         width: 45.22px;
                         height: 25.31px;
-                    }
-                    .camera-list {
-                        top: 70px;
                     }
                 }
                 .uploadImgLabel {
@@ -497,7 +551,7 @@ export default defineComponent({
                 }
             }
             .logo {
-                span {
+                div {
                     display: block;
                     font-size: 24px;
                     color: #ffffff;
@@ -516,7 +570,6 @@ export default defineComponent({
             }
         }
     }
-
     @media screen and (max-width: 979px) {
         .content {
             .function-choose {
@@ -524,11 +577,6 @@ export default defineComponent({
                     .camera-choose {
                         .camera-name {
                             display: none;
-                        }
-                    }
-                    .camera-list {
-                        li {
-                            width: 200px;
                         }
                     }
                 }
@@ -550,4 +598,3 @@ export default defineComponent({
         }
     }
 </style>
-

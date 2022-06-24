@@ -10,6 +10,7 @@ export default defineComponent({
         const isShowStaticImg = inject('isShowStaticImg') as Ref<boolean>;
         const recognizeResultInfo = inject('recognizeResultInfo') as Ref<string[]>;
         const recognizeImg = inject('recognizeImg') as Ref<any>;
+        const cameraIsExists = inject('cameraIsExists') as any;
         const recognizeImgInfo = inject('recognizeImgInfo') as Ref<any>;
         const sampleImg = require('@/assets/sampleImg/passport.png');
         const resultTitles = ref(['Document Type :', 'Issuing State :', 'Surname :', 'Given Name :', 'Passport Number :', 'Nationality :', 'Date of Birth (YYYY-MM-DD) :', 'Gender :', 'Date of Expiry (YYYY-MM-DD) :'] as Array<string>)
@@ -19,7 +20,7 @@ export default defineComponent({
 
         // Display different titles according to different modes
         const titleMode = () => {
-            if(runtimeMode.value === 'video-mrz') {
+            if(runtimeMode.value === 'mrz') {
                 return <div class="title">
                             {
                                 resultTitles.value.map(item => {
@@ -31,7 +32,7 @@ export default defineComponent({
         };
 
         const MRZResult = () => {
-            if(runtimeMode.value === 'video-mrz') {
+            if(runtimeMode.value === 'mrz') {
                 return (
                     <div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;font-size:12px;font-style:italic;">
                         {
@@ -46,7 +47,7 @@ export default defineComponent({
 
         // restart the video
         const restartVideo = () => {
-            recognizer.value.resumeScanning();
+            cameraIsExists.value ? recognizer.value.resumeScanning(): null;
             isShowStaticImg.value = false;
         };
 
@@ -75,11 +76,11 @@ export default defineComponent({
         watch(recognizeResultInfo, () => {
             finalResult.value.slice(0, finalResult.value.length);
             // All data is normally obtained in passportMrz mode
-            if(runtimeMode.value === 'video-mrz' && recognizeResultInfo.value.length === 2) {
+            if(runtimeMode.value === 'mrz' && recognizeResultInfo.value.length === 2) {
                 let tmp = mrzParseTwoLine(recognizeResultInfo.value[0], recognizeResultInfo.value[1]);
                 finalResult.value.slice(0, finalResult.value.length);
                 finalResult.value = tmp;
-            } else if((runtimeMode.value === 'video-mrz') && recognizeResultInfo.value.length === 3) {
+            } else if((runtimeMode.value === 'mrz') && recognizeResultInfo.value.length === 3) {
                 let tmp = mrzParseThreeLine(recognizeResultInfo.value[0], recognizeResultInfo.value[1], recognizeResultInfo.value[2]);
                 finalResult.value = tmp;
             } else {

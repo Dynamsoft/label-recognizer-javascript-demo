@@ -18,18 +18,18 @@ export default defineComponent ({
         const { proxy }: any = getCurrentInstance();
 
         (async () => {
-            if((runtimeMode.value === 'video-mrz')) {
+            if((runtimeMode.value === 'mrz')) {
                 let tmp = parseResultInfo.value;
                 finalResult.value.slice(0, finalResult.value.length);
                 finalResult.value = tmp;
-            } else if(runtimeMode.value === 'video-vin') {
+            } else if(runtimeMode.value === 'vin') {
                 finalResult.value.push(recognizeResultInfo.value);
             }
         })()
         
         // Display different titles according to different modes
         const titleMode = () => {
-            if(runtimeMode.value === 'video-mrz') {
+            if(runtimeMode.value === 'mrz') {
                 return (
                     resultTitles.value.map((item: string, index: number) => {
                         return (
@@ -48,9 +48,9 @@ export default defineComponent ({
         };
         
         const MRZString = () => {
-            if(runtimeMode.value === 'video-mrz') {
+            if(runtimeMode.value === 'mrz') {
                 return (
-                    <div class="raw-string" v-show={runtimeMode.value === 'video-mrz'}>
+                    <div class="raw-string" v-show={runtimeMode.value === 'mrz'}>
                         MRZ String : 
                         {
                             recognizeResultInfo.value.map((item: any, index: number) => {
@@ -70,7 +70,7 @@ export default defineComponent ({
                 let clipboard = new Clipboard('.copy-btn', {
                     text: (): string => {
                         let copyContent = '';
-                        if(runtimeMode.value === 'video-mrz') {
+                        if(runtimeMode.value === 'mrz') {
                             for(let i = 0; i < resultTitles.value.length; i++) {
                                 copyContent += resultTitles.value[i] + ' ' + finalResult.value[i] + '\n';
                             }
@@ -129,7 +129,7 @@ export default defineComponent ({
                         </g>
                     </svg>
                 </div> 
-                <div class={{'content-main': true, 'isMRZ': runtimeMode.value === 'video-mrz'}}>
+                <div class={{'content-main': true, 'isMRZ': runtimeMode.value === 'mrz'}}>
                     { titleMode() }
                     { MRZString() }
                 </div>

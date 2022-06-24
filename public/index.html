@@ -10,8 +10,8 @@
     <link rel="manifest" href="./manifest.json" />
     <title>Label Recognizer JavaScript Demo | Dynamsoft</title>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@2.2.2/dist/dlr.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@2.0.3/dist/dce.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@2.2.10/dist/dlr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@2.3.2/dist/dce.js"></script>
     <style>
       * {
         margin: 0;
@@ -28,8 +28,10 @@
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
-    <!-- built files will be auto injected -->
     <script>
+    </script>
+    <!-- built files will be auto injected -->
+    <!-- <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
           navigator.serviceWorker.register("service-worker.js").then(function (registration) {
@@ -45,6 +47,6 @@
         } else {
           console.log('service worker is not supported');
         }
-    </script>
+    </script> -->
   </body>
 </html>

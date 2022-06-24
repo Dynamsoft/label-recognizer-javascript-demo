@@ -31,8 +31,13 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
-, "src/store/index.js", "src/store/mutations.js", "src/store/state.ts", "src/store/actions.js", "src/store/getters.js"  ],
+    "tests/**/*.tsx",
+    "src/store/index.js", 
+    "src/store/mutations.js", 
+    "src/store/state.ts", 
+    "src/store/actions.js", 
+    "src/store/getters.js"  
+  ],
   "exclude": [
     "node_modules"
   ]
