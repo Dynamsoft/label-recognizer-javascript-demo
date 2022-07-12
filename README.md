@@ -9,7 +9,7 @@ https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html
 >
 > We recommend that you instead try out the samples in the DLRJS samples repository https://github.com/Dynamsoft/label-recognizer-javascript-samples. 
 >
-> The demo itself is based on Vue 2, you can find a simple Vue 2 sample at https://github.com/Dynamsoft/label-recognizer-javascript-samples/tree/main/1.hello-world/5.read-video-vue.
+> The demo itself is based on Vue 3, you can find a simple Vue 2 sample at https://github.com/Dynamsoft/label-recognizer-javascript-samples/tree/main/1.hello-world/5.read-video-vue.
 
 If you would like to get this demo project running, you can follow the steps below:
 
