@@ -1,19 +1,17 @@
-# Dynamsoft Label Recognizer JavaScript Edition Demo
+# Dynamsoft JavaScript MRZ Scanner Demo
 
-This repository contains the source code for the demo of Dynamsoft Label Recognizer JavaScript Edition (DLRJS). You can try out the demo from this link:
-https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html
+This repository contains the source code of the [web MRZ scanner online demo](https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html) which uses the JavaScript Edition of [Dynamsoft Label Recognizer SDK](https://www.dynamsoft.com/label-recognition/overview/), an OCR SDK that reads alphanumeric characters and standard symbols from images of varying background colour, font, or text size.
 
-> NOTE
+
+> NOTE:
 >
-> A big part of the source code is dedicated to making a better UI or creating better user experience for demoing purposes, which might be distracting if you intend to learn about the SDK and its basic usage.
+> This project includes a big part of UI-related source code for demoing purposes. 
 >
-> We recommend that you instead try out the samples in the DLRJS samples repository https://github.com/Dynamsoft/label-recognizer-javascript-samples.
->
-> The demo itself is based on Vue 3, you can find a simple Vue 3 sample at https://github.com/Dynamsoft/label-recognizer-javascript-samples/tree/main/1.hello-world/6.read-video-vue3.
+> To create your own MRZ scanner application, you may start with the simple samples in the [Dynamsoft Label Recognizer JS samples repository](https://github.com/Dynamsoft/label-recognizer-javascript-samples).
 
-If you would like to get this demo project running, you can follow the steps below:
+## Run the project
 
-## Try the project
+To get this MRZ demo project running, you can follow the steps below:
 
 1. Set up
 
@@ -23,9 +21,9 @@ If you would like to get this demo project running, you can follow the steps bel
 
 2. Add license
 
-    > If you don't have a license yet, you can skip this step. You will still be able to test the demo for up to 24 hours.
+    A default license is included which allows you to test the demo for up to 24 hours. You can [request a trial license](https://www.dynamsoft.com/customer/license/trialLicense?product=dlr) via Dynamsoft customer portal to evaluate further.
 
-    Open "src/dlr.ts" and input your license key in this line:
+    Open `src/dlr.ts` and input your license key in this line:
 
     ```ts
     LabelRecognizer.license = 'YOUR LICENSE';
