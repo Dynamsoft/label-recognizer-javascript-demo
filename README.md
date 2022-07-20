@@ -1,17 +1,16 @@
 # Dynamsoft JavaScript MRZ Scanner Demo
 
-This repository contains the source code of the [web MRZ scanner online demo](https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html) which uses the JavaScript Edition of [Dynamsoft Label Recognizer SDK](https://www.dynamsoft.com/label-recognition/overview/), an OCR SDK that reads alphanumeric characters and standard symbols from images of varying background colour, font, or text size.
-
+This repository contains the source code of the [web MRZ scanner online demo](https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html) and [web VIN scanner online demo](https://demo.dynamsoft.com/label-recognizer-js/vin.html) which uses the JavaScript Edition of [Dynamsoft Label Recognizer SDK](https://www.dynamsoft.com/label-recognition/overview/), an OCR SDK that reads alphanumeric characters and standard symbols from images of varying background colour, font, or text size.
 
 > NOTE:
 >
 > This project includes a big part of UI-related source code for demoing purposes. 
 >
-> To create your own MRZ scanner application, you may start with the simple samples in the [Dynamsoft Label Recognizer JS samples repository](https://github.com/Dynamsoft/label-recognizer-javascript-samples).
+> To create your own MRZ or VIN scanner application, you may start with the simple samples in the [Dynamsoft Label Recognizer JS samples repository](https://github.com/Dynamsoft/label-recognizer-javascript-samples).
 
 ## Run the project
 
-To get this MRZ demo project running, you can follow the steps below:
+To get this demo project running, you can follow the steps below:
 
 1. Set up
 
