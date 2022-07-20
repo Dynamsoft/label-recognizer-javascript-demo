@@ -13,6 +13,10 @@ https://demo.dynamsoft.com/label-recognizer-js/mrz-scanner.html
 
 If you would like to get this demo project running, you can follow the steps below:
 
+## Preparation
+
+Make sure you have [node](https://nodejs.org/), [yarn](https://yarnpkg.com/cli/install) and [Vue CLI](https://cli.vuejs.org/) installed. `node 14.16.0` , `yarn 1.22.10` and `@vue/cli 4.5.13` are used in the example below. 
+
 ## Try the project
 
 1. Set up
@@ -23,7 +27,7 @@ If you would like to get this demo project running, you can follow the steps bel
 
 2. Add license
 
-    > If you don't have a license yet, you can skip this step. You will still be able to test the demo for up to 24 hours.
+    > If you don't have a license yet, you can skip this step. You will still be able to test the demo for up to 24 hours. You can also visit https://www.dynamsoft.com/customer/license/trialLicense?utm_source=sample&product=dlr&package=js to get your own trial license good for 30 days. 
 
     Open "src/dlr.ts" and input your license key in this line:
 
