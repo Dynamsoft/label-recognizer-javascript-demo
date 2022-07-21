@@ -8,9 +8,11 @@ This repository contains the source code of the [web MRZ scanner online demo](ht
 >
 > To create your own MRZ or VIN scanner application, you may start with the simple samples in the [Dynamsoft Label Recognizer JS samples repository](https://github.com/Dynamsoft/label-recognizer-javascript-samples).
 
-## Run the project
+## Preparation
 
-To get this demo project running, you can follow the steps below:
+Make sure you have [node](https://nodejs.org/), [yarn](https://yarnpkg.com/cli/install) and [Vue CLI](https://cli.vuejs.org/) installed. `node 14.16.0` , `yarn 1.22.10` and `@vue/cli 4.5.13` are used in the example below. 
+
+## Run the project
 
 1. Set up
 
