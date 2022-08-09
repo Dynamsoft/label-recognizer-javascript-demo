@@ -21,7 +21,7 @@ export default defineComponent({
         const isShowScanningPrompt = ref(false);
         // Result
         const recognizeResultInfo = ref([] as Array<string>);
-        const recognizeImg = ref(null);
+        const recognizeImg = ref(null) as Ref<any> as Ref<LabelRecognizer>;
         const cameraList = ref([]);
         const recognizeImgInfo = ref(null as any as File);
         const isShowCameraList = ref(false);
@@ -154,6 +154,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .labelRecognizer {
+    overflow: auto;
     width: 100%;
     height: 100%;
 }

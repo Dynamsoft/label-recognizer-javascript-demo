@@ -1,10 +1,10 @@
 <script lang="tsx">
 import { defineComponent, inject, ref, watchEffect, Ref, onBeforeUnmount, getCurrentInstance, onMounted } from 'vue';
-import { LabelRecognizer as DLR } from 'dynamsoft-label-recognizer';
-import { CameraEnhancer as DCE } from 'dynamsoft-camera-enhancer';
-import { mrzParseTwoLine, mrzParseThreeLine } from '../../mrz-parse'
+import { LabelRecognizer as DLR, DLRLineResult, DLRResult } from 'dynamsoft-label-recognizer';
+import { CameraEnhancer as DCE, DrawingItem } from 'dynamsoft-camera-enhancer';
+import { mrzParseTwoLine, mrzParseThreeLine } from '../../mrz-parser';
 import { MobileOutlined } from '@ant-design/icons-vue';
-import NoCameraPage from './NoCameraPage.vue'
+import NoCameraPage from './NoCameraPage.vue';
 
 const formatModeName = (str: string) => {
   switch (str) {
@@ -44,6 +44,7 @@ export default defineComponent({
       const cameraIsExists = inject('cameraIsExists') as any;
 
       runtimeMode.value = location.pathname.indexOf('vin') === -1 ? 'mrz' : 'vin';
+      runtimeMode.value === "mrz" ? document.title = "MRZ Scanner | Dynamsoft Label Recognizer" : document.title = "VIN Scanner (Beta) | Dynamsoft Label Recognizer";
       
       const scanningText = ref(false);
       const elRefs = ref(null);
@@ -79,13 +80,14 @@ export default defineComponent({
             }, 500);
           }
           recognizer.value = await DLR.createInstance();
-          recognizer.value.setImageSource(cameraEnhancer.value);
+          await recognizer.value.setImageSource(cameraEnhancer.value, {resultsHighlightBaseShapes: DrawingItem});
           await recognizer.value.updateRuntimeSettingsFromString(runtimeMode.value);
           cameraEnhancer.value.setVideoFit('cover');
+          recognizer.value.ifSaveOriginalImageInACanvas = true;
           // recognizer.value.intervalTime = 1000;
           window.addEventListener('resize', video_OnWindowResize);
 
-          recognizer.value.onImageRead = async (results: any) => {
+          recognizer.value.onImageRead = async (results: DLRResult[]) => {
             if(results.length !== 0 && (runtimeMode.value === 'number' || runtimeMode.value === 'letter')) {
               let resultArr: Array<string> = [];
               results[0].lineResults.forEach((res: any) => {
@@ -96,11 +98,13 @@ export default defineComponent({
             }
           };
                     
-          recognizer.value.onMRZRead = async (_: string, results: any) => {
-            cameraEnhancer.value.ifSaveOriginalImageInACanvas = true;
+          recognizer.value.onMRZRead = async (_: string, results: DLRLineResult[]) => {
+            console.log(recognizer.value.getOriginalImageInACanvas());
+           /*  cameraEnhancer.value.ifSaveOriginalImageInACanvas = true;
             let currentFrame = cameraEnhancer.value.getFrame();
             recognizerFrame.value = currentFrame.toCanvas();
-            cameraEnhancer.value.ifSaveOriginalImageInACanvas = false;
+            cameraEnhancer.value.ifSaveOriginalImageInACanvas = false; */
+            recognizerFrame.value = recognizer.value.getOriginalImageInACanvas();
 
             let resultArr: Array<string> = [];
             results.forEach((res: any) => {
@@ -125,7 +129,7 @@ export default defineComponent({
             }
           }
 
-          recognizer.value.onVINRead = (txt: string) => {
+          recognizer.value.onVINRead = (txt: string, result: DLRLineResult) => {
             let resultArr: Array<string> = [];
             resultArr.push(txt);
             isNeedPlaySound.value && recognizer.value.beepSound.play();
@@ -150,6 +154,10 @@ export default defineComponent({
 
       onBeforeUnmount(() => {
         window.removeEventListener('resize', video_OnWindowResize);
+        cameraEnhancer.value.dispose();
+        recognizer.value.destroyContext();
+        cameraEnhancer.value = null;
+        recognizer.value = null;
       })
 
       watchEffect(() => {

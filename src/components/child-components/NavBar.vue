@@ -38,6 +38,7 @@ export default defineComponent({
                 if(recognizer.value) {
                     isShowResults.value = false;
                     runtimeMode.value = modeSelected.value;
+                    runtimeMode.value === "mrz" ? document.title = "MRZ Scanner | Dynamsoft Label Recognizer" : document.title = "VIN Scanner (Beta) | Dynamsoft Label Recognizer";
 
                     recognizer.value.pauseScanning();
                     await recognizer.value.updateRuntimeSettingsFromString(modeSelected.value);

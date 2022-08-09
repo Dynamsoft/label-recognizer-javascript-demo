@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { defineComponent, provide, ref, Ref } from 'vue';
-import { LabelRecognizer } from 'dynamsoft-label-recognizer'
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 import './dlr.ts'
 import './dce.ts'
 
@@ -29,7 +29,7 @@ export default defineComponent({
           <progress class="loadProgress" value={progressRate.value} max={100}></progress>
         </div>
         <div class="imgRecognitionMask" v-show={isShowImgRecognitionMask.value}>
-          <div>decoding...</div>
+          <div>recognizing...</div>
         </div>
       </>
     )

@@ -185,7 +185,7 @@ export default defineComponent({
             return <ul class="modeList">
                         {
                             <><li style={{ color: runtimeMode.value==="mrz"? "#fe8e14":'#aaaaaa' }} onClick={() => { changeMode("mrz"); } }><div>MRZ Scanner</div></li>
-                            <li style={{ color: runtimeMode.value==="vin"? "#fe8e14":'#aaaaaa' }} onClick={() => { changeMode("vin"); } }><div>VIN (bate)</div></li></>
+                            <li style={{ color: runtimeMode.value==="vin"? "#fe8e14":'#aaaaaa' }} onClick={() => { changeMode("vin"); } }><div>VIN (beta)</div></li></>
                         }
                     </ul>
         }
@@ -197,6 +197,7 @@ export default defineComponent({
                 if(recognizer.value) {
                     isShowResults.value = false;
                     runtimeMode.value = mode;
+                    runtimeMode.value === "mrz" ? document.title = "MRZ Scanner | Dynamsoft Label Recognizer" : document.title = "VIN Scanner (Beta) | Dynamsoft Label Recognizer";
                     recognizer.value.pauseScanning();
                     await recognizer.value.updateRuntimeSettingsFromString(mode);
                     setRegion();

@@ -1,9 +1,9 @@
 {
   "name": "dlrjs-demo",
-  "version": "0.1.0",
+  "version": "2.2.11",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --https true",
     "build": "vue-cli-service build",
     "build:self-iis-test": "vue-cli-service build --mode self-iis-test",
     "build:self-tst-host": "vue-cli-service build --mode self-tst-host",
@@ -11,12 +11,13 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
+    "@gtm-support/vue-gtm": "^1.6.0",
     "ant-design-vue": "2.2.8",
     "babel-plugin-import": "^1.13.3",
     "clipboard": "2.0.8",
     "core-js": "^3.6.5",
-    "dynamsoft-camera-enhancer": "2.3.2",
-    "dynamsoft-label-recognizer": "2.2.10",
+    "dynamsoft-camera-enhancer": "3.0.1",
+    "dynamsoft-label-recognizer": "2.2.11",
     "vue": "^3.2.33",
     "vue-loader-v16": "^16.0.0-beta.5.4",
     "vue-router": "^4.0.14"
