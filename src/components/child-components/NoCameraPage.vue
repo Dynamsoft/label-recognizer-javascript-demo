@@ -32,7 +32,7 @@ export default defineComponent({
           </div>
           { clientWidth.value >= 980 ? <div class="qrcode"><img src={qrcode} /></div> : ''}
           { clientWidth.value >= 980 ? 
-            <div class="text">Scan the QR Code above, and try the demo on your phone</div> 
+            <div class="text">Scan the QR code and try the demo on your phone</div> 
               : 
             <div class="text">Please check whether your browser has camera permission</div> 
           }

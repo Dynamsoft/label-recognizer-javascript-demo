@@ -3,11 +3,10 @@
   "version": "2.2.11",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --https true",
+    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:self-iis-test": "vue-cli-service build --mode self-iis-test",
-    "build:self-tst-host": "vue-cli-service build --mode self-tst-host",
-    "build:self-final": "vue-cli-service build --mode self-final"
+    "build:publish": "vue-cli-service build --mode publish"
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
@@ -16,8 +15,9 @@
     "babel-plugin-import": "^1.13.3",
     "clipboard": "2.0.8",
     "core-js": "^3.6.5",
-    "dynamsoft-camera-enhancer": "3.0.1",
-    "dynamsoft-label-recognizer": "2.2.11",
+    "dynamsoft-camera-enhancer": "^3.1.0",
+    "keillion-dynamsoft-label-recognizer": "^0.20221025155807.0",
+    "shen-dynamsoft-code-parser": "0.20221010140932.0",
     "vue": "^3.2.33",
     "vue-loader-v16": "^16.0.0-beta.5.4",
     "vue-router": "^4.0.14"
@@ -33,6 +33,7 @@
     "sass-loader": "^8.0.2",
     "typescript": "4.3.5",
     "uglifyjs-webpack-plugin": "2.2.0",
+    "webpack": "^4.46.0",
     "webpack-bundle-analyzer": "4.4.2"
   }
 }

@@ -3,15 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <link rel="icon" href="<%= BASE_URL %>faviconJs.ico">
     <link rel="apple-touch-icon" sizes="192x192" href="./dynamsoft-192x192.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="./dynamsoft-512x512.png" />
     <link rel="manifest" href="./manifest.json" />
     <title>Label Recognizer JavaScript Demo | Dynamsoft</title>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@2.2.11/dist/dlr.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@3.0.1/dist/dce.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/keillion-dynamsoft-label-recognizer@0.20221025155807.0/dist/dlr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shen-dynamsoft-code-parser@0.20221010140932.0/dist/dcp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@3.1.0/dist/dce.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/eruda@2.4.1/eruda.min.js"></script> -->
     <style>
       * {
         margin: 0;
@@ -29,9 +32,10 @@
     </noscript>
     <div id="app"></div>
     <script>
+      // eruda.init();
     </script>
     <!-- built files will be auto injected -->
-    <!-- <script>
+    <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
           navigator.serviceWorker.register("service-worker.js").then(function (registration) {
@@ -43,10 +47,15 @@
           }).catch(function (err) {
               console.log(err)
             });
-          });
-        } else {
-          console.log('service worker is not supported');
-        }
-    </script> -->
+        });
+      } else {
+        console.log('service worker is not supported');
+      }
+    </script>
+
+    <script type="text/javascript">
+      var Comm100API=Comm100API||{};
+      (function(t){function e(e){var a=document.createElement("script"),c=document.getElementsByTagName("script")[0];a.type="text/javascript",a.async=!0,a.src=e+t.site_id,c.parentNode.insertBefore(a,c)}t.chat_buttons=t.chat_buttons||[],t.chat_buttons.push({code_plan:"20242b05-3781-4d86-9b7f-fab63ddcdde3",div_id:"comm100-button-20242b05-3781-4d86-9b7f-fab63ddcdde3"}),t.site_id=90003305,t.main_code_plan="20242b05-3781-4d86-9b7f-fab63ddcdde3",e("https://vue.comm100.com/livechat.ashx?siteId="),setTimeout(function(){t.loaded||e("https://standby.comm100vue.com/livechat.ashx?siteId=")},5e3)})(Comm100API||{})
+    </script>
   </body>
 </html>

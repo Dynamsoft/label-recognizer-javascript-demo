@@ -40,7 +40,8 @@ module.exports = {
             config.externals = {
                 'clipboard': 'ClipboardJS',
                 'dynamsoft-camera-enhancer': 'Dynamsoft.DCE',
-                'dynamsoft-label-recognizer': 'Dynamsoft.DLR'
+                'dynamsoft-label-recognizer': 'Dynamsoft.DLR',
+                'dynamsoft-code-parser': 'Dynamsoft.DCP'
             };
         }
     },

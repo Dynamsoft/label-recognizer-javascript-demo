@@ -1,8 +1,9 @@
 <script lang="tsx">
 import { defineComponent, provide, ref, Ref } from 'vue';
-import { LabelRecognizer } from 'dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
 import './dlr.ts'
 import './dce.ts'
+import './dcp.ts'
 
 export default defineComponent({
   setup() {
@@ -23,7 +24,6 @@ export default defineComponent({
     return () => (
       <>
         <router-view></router-view>
-        { /* isShowHomePage.value ? <HomePage /> : <RecognizerPage /> */ }
         <div class="dataLoadingMask" v-show={isShowMask.value}>
           <div>Model Loading......</div>
           <progress class="loadProgress" value={progressRate.value} max={100}></progress>
@@ -78,6 +78,9 @@ ul {
 }
 li {
   list-style: none;
+}
+img {
+  vertical-align: inherit;
 }
 .dataLoadingMask progress { 
   -webkit-appearance: none; 
@@ -154,5 +157,12 @@ li {
     }
     
   }
+  #comm100-float-button-2 {
+    display: none !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+  }
 }
+
 </style>

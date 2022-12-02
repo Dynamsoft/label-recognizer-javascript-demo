@@ -1,14 +1,14 @@
 <script lang="tsx">
-import { computed, defineComponent, inject, provide, ref, Ref } from 'vue';
+import { computed, defineComponent, inject, provide, ref, Ref, getCurrentInstance } from 'vue';
 import TopToolBar from './child-components/TopToolBar.vue';
 import BottomToolBar from './child-components/NavBar.vue';
 import Video from './child-components/Video.vue';
-import ImgRecognizer from './child-components/ImgRecognizer.vue';
 import MrzOrVinResult from './child-components/MrzOrVinResult.vue';
 import NumberOrLetterResult from './child-components/NumberOrLetterReault.vue'
 import Footer from './Footer.vue';
-import { LabelRecognizer } from 'dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
 import { CameraEnhancer } from 'dynamsoft-camera-enhancer';
+import { CodeParser } from "shen-dynamsoft-code-parser";
 
 export default defineComponent({
     setup() {
@@ -21,9 +21,7 @@ export default defineComponent({
         const isShowScanningPrompt = ref(false);
         // Result
         const recognizeResultInfo = ref([] as Array<string>);
-        const recognizeImg = ref(null) as Ref<any> as Ref<LabelRecognizer>;
         const cameraList = ref([]);
-        const recognizeImgInfo = ref(null as any as File);
         const isShowCameraList = ref(false);
         const isShowModeList = ref(false);
         const isShowSettingList = ref(false);
@@ -33,6 +31,7 @@ export default defineComponent({
         const recognizerCount = ref(0);
         const cameraEnhancer = ref(null) as Ref<any> as Ref<CameraEnhancer>
         const recognizer = ref(null) as Ref<any> as Ref<LabelRecognizer>;
+        const parser = ref(null) as Ref<any> as Ref<CodeParser>;
         const isNeedPlaySound = ref(true) as Ref<boolean>;
         const visibleRegionInPixels = ref(null) as Ref<any>;
         const currentResolution = ref([]) as any;
@@ -119,10 +118,9 @@ export default defineComponent({
 
         provide('recognizer', recognizer);
         provide('cameraEnhancer', cameraEnhancer);
+        provide('parser', parser);
         provide('cameraList', cameraList);
         provide('recognizeResultInfo', recognizeResultInfo);
-        provide('recognizeImg', recognizeImg);
-        provide('recognizeImgInfo', recognizeImgInfo);
         provide('isShowStaticImg', isShowStaticImg);
         provide('isShowResults', isShowResults);
         provide('isShowCameraList', isShowCameraList);
@@ -135,13 +133,13 @@ export default defineComponent({
         provide('recognizerCount', recognizerCount);
         provide('isShowNumOrLetResults', isShowNumOrLetResults);
         provide('isNeedPlaySound', isNeedPlaySound);
-        provide('setRegion', setRegion);
         provide('cameraIsExists', cameraIsExists);
-
+        provide('setRegion', setRegion);
+        
         return () => (
             <div class="labelRecognizer">  
                 { !isShowStaticImg.value && <TopToolBar />}
-                { isShowStaticImg.value ?  <ImgRecognizer /> : <Video /> }
+                <Video />
                 { isShowResults.value && <MrzOrVinResult /> }
                 { isShowNumOrLetResults.value && <NumberOrLetterResult /> }
                 { !isShowStaticImg.value && <BottomToolBar />}
