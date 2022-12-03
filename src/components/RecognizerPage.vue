@@ -6,7 +6,7 @@ import Video from './child-components/Video.vue';
 import MrzOrVinResult from './child-components/MrzOrVinResult.vue';
 import NumberOrLetterResult from './child-components/NumberOrLetterReault.vue'
 import Footer from './Footer.vue';
-import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 import { CameraEnhancer } from 'dynamsoft-camera-enhancer';
 import { CodeParser } from "shen-dynamsoft-code-parser";
 

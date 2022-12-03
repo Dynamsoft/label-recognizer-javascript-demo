@@ -3,7 +3,7 @@ import { defineComponent, ref, inject, watch, getCurrentInstance, Ref } from 'vu
 import { CodeParser } from "shen-dynamsoft-code-parser";
 import { MobileOutlined } from '@ant-design/icons-vue';
 import { useRouter } from "vue-router";
-import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 
 export default defineComponent({
     setup() {

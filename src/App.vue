@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { defineComponent, provide, ref, Ref } from 'vue';
-import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 import './dlr.ts'
 import './dce.ts'
 import './dcp.ts'

@@ -1,7 +1,7 @@
 <script lang="tsx">
 import { defineComponent, inject, ref, getCurrentInstance, Ref, onMounted, onBeforeMount } from 'vue';
 import Clipboard from "clipboard";
-import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 import { CodeParser } from 'shen-dynamsoft-code-parser';
 import { mrzParseTwoLine, mrzParseThreeLine } from '../../mrz-parser';
 

@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { defineComponent, inject, ref, watchEffect, Ref, onBeforeUnmount, getCurrentInstance, onMounted, onBeforeMount } from 'vue';
-import { LabelRecognizer as DLR, DLRLineResult, DLRResult } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer as DLR, DLRLineResult, DLRResult } from 'dynamsoft-label-recognizer';
 import { CameraEnhancer as DCE, DrawingItem } from 'dynamsoft-camera-enhancer';
 import { CodeParser as DCP } from "shen-dynamsoft-code-parser";
 import { mrzParseTwoLine, mrzParseThreeLine } from '../../mrz-parser';

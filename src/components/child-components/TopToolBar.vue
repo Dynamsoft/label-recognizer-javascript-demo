@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { defineComponent, inject, ref, getCurrentInstance, Ref, watchEffect } from 'vue';
-import { LabelRecognizer } from 'keillion-dynamsoft-label-recognizer';
+import { LabelRecognizer } from 'dynamsoft-label-recognizer';
 import { CodeParser } from 'shen-dynamsoft-code-parser';
 import { DownOutlined, MobileOutlined, UpOutlined } from '@ant-design/icons-vue';
 import { useRouter } from "vue-router";
@@ -16,7 +16,6 @@ export default defineComponent({
         const liveChat = require('@/assets/image/message.svg');
         const camera = require('@/assets/image/camera.svg')
         const addImage = require('@/assets/image/image-files.svg');
-        const screenshotIcon = require('@/assets/image/grey.svg');
         const arrowGreyDown = require('@/assets/image/arrow-grey-down.svg');
         const arrowGreyUp = require('@/assets/image/arrow-grey-up.svg');
         const download = require('@/assets/image/download.svg');
@@ -36,7 +35,6 @@ export default defineComponent({
         const isNeedPlaySound = inject('isNeedPlaySound') as Ref<boolean>;
         const cameraIsExists = inject('cameraIsExists') as Ref<boolean>;
         const setRegion = inject('setRegion') as any;
-        const getImages = inject('getImages') as any;
         const isShowScanningPrompt = inject('isShowScanningPrompt') as Ref<boolean>;
         const parseResultInfo = inject('parseResultInfo') as Ref<any>;
         const recognizerFrame = inject('recognizerFrame') as Ref<any>;
@@ -223,28 +221,6 @@ export default defineComponent({
             recognizer.value.resumeScanning();
             proxy.$message.success(`Switched to ${cameraSelected.value.label} successfully!`);
         }
-        const goToChat = () => {
-            let link = document.querySelector("#comm100-container a");
-            if (!link) {
-                link = document.getElementById("comm100-float-button-2-inner");
-            }
-            if (!link) {
-                link = document.querySelector("#comm100-container img");
-            }
-            if (!link) {
-                link = document.getElementById("comm100-container");
-            }
-            try {
-                let ev = new MouseEvent("click", {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                });
-                link!.dispatchEvent(ev);
-            } catch (ex) {
-                (link as HTMLLinkElement)!.click();
-            }
-        }
         const formatModeName = (str: string) => {
             if(str === 'vin') {
                 return 'VIN (beta)'
@@ -347,9 +323,6 @@ export default defineComponent({
                         <div class={{'sound': true, 'isPlaySound': isNeedPlaySound.value}} onClick={switchSoundIsPlay}>
                             <img src={ musicUnSelected } class="soundNotPlaySvg" v-show={!isNeedPlaySound.value}/>
                             <img src={ musicSelected } class="soundPlaySvg" v-show={isNeedPlaySound.value}/>
-                        </div>
-                        <div class="liveChat" onClick={ goToChat }>
-                            <img src={ liveChat }/>
                         </div>
                     </div>
                     <div class="logo" onClick={closeList}>
