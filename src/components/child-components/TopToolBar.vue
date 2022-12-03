@@ -13,7 +13,6 @@ export default defineComponent({
         const vinSampleImg = require('@/assets/sampleImg/vin.png');
         const musicSelected = require('@/assets/image/music-selected.svg');
         const musicUnSelected = require('@/assets/image/music-unselected.svg');
-        const liveChat = require('@/assets/image/message.svg');
         const camera = require('@/assets/image/camera.svg')
         const addImage = require('@/assets/image/image-files.svg');
         const arrowGreyDown = require('@/assets/image/arrow-grey-down.svg');
