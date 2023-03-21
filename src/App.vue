@@ -9,26 +9,27 @@ export default defineComponent({
   setup() {
     const isShowHomePage = ref(true) as Ref<boolean>;
     const runtimeMode = ref('') as Ref<string>;
-    const isShowMask = ref(false) as Ref<boolean>;
-    const isShowImgRecognitionMask = ref(false) as Ref<boolean>;
+    const bShowMask = ref(false) as Ref<boolean>;
+    const bShowImgRecognitionMask = ref(false) as Ref<boolean>;
     const progressRate = ref() as Ref<number>;
 
     provide('isShowHomePage', isShowHomePage);
     provide('runtimeMode', runtimeMode);
-    provide('isShowMask', isShowMask);
+    provide('bShowMask', bShowMask);
     provide('progressRate', progressRate);
-    provide('isShowImgRecognitionMask', isShowImgRecognitionMask);
+    provide('bShowImgRecognitionMask', bShowImgRecognitionMask);
 
     LabelRecognizer.loadWasm();
 
     return () => (
       <>
         <router-view></router-view>
-        <div class="dataLoadingMask" v-show={isShowMask.value}>
+        { /* isShowHomePage.value ? <HomePage /> : <RecognizerPage /> */ }
+        <div class="dataLoadingMask" v-show={bShowMask.value}>
           <div>Model Loading......</div>
           <progress class="loadProgress" value={progressRate.value} max={100}></progress>
         </div>
-        <div class="imgRecognitionMask" v-show={isShowImgRecognitionMask.value}>
+        <div class="imgRecognitionMask" v-show={bShowImgRecognitionMask.value}>
           <div>recognizing...</div>
         </div>
       </>

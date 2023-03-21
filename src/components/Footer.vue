@@ -10,7 +10,7 @@ export default defineComponent({
                     <div class="footer-content">
                         <img src={dynamsofticon}/>
                         <span>
-                            © 2003 - 2022 Dynamsoft. All rights reserved. 
+                            © 2003 - 2023 Dynamsoft. All rights reserved. 
                             <a href="https://www.dynamsoft.com/PrivacyStatement.aspx"> Privacy Statement </a>
                             /
                             <a href="https://www.dynamsoft.com/SiteMap.aspx"> Site Map</a>
@@ -50,6 +50,7 @@ export default defineComponent({
             img {
                 height: 60%;
                 margin-right: 45px;
+                vertical-align: middle;
             }
             span {
                 font-size: 16px;

@@ -22,6 +22,7 @@ export const mrzParseTwoLine = (line1: string, line2: string) => {
   if(nation[nation.length - 1] === '<') {
       nation = nation.substr(0, 2);
   }
+  nation = nation.replace(/\</g, "");
   passportMRZ.nationality = nation;
   // Get surname information
   line1 = line1.substring(5);
@@ -47,6 +48,7 @@ export const mrzParseTwoLine = (line1: string, line2: string) => {
   if(issueCountry[issueCountry.length - 1] == '<'){
       issueCountry = issueCountry.substr(0, 2);
   }
+  issueCountry = issueCountry.replace(/\</g, "");
   passportMRZ.issuecountry = issueCountry;
   // Get date of birth information
   let birth = line2.substr(13, 6);

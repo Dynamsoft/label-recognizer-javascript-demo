@@ -2,11 +2,12 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { message, Dropdown, Menu, Popover, Spin } from 'ant-design-vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import { createGtm } from '@gtm-support/vue-gtm';
 
 const routes = [
-  { path: '/', component: () => import('./components/HomePage.vue') },
-  { path: '/mrz-scanner.html', component: () => import('./components/RecognizerPage.vue') },
-  { path: '/vin.html', component: () => import('./components/RecognizerPage.vue') }
+  { path: '/', component: () => import('./views/HomePage.vue') },
+  { path: '/mrz-scanner.html', component: () => import('./views/RecognizerPage.vue') },
+  { path: '/vin.html', component: () => import('./views/RecognizerPage.vue') }
 ]
 
 const router = createRouter({
@@ -21,8 +22,6 @@ app.use(Dropdown);
 app.use(Menu);
 app.use(Popover);
 app.use(Spin);
-
-// document.dispatchEvent(new Event('render-event'));
 
 app.config.globalProperties.$message = message;
 
