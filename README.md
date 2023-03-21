@@ -17,7 +17,7 @@ Make sure you have [node](https://nodejs.org/), [yarn](https://yarnpkg.com/cli/i
 1. Set up
 
     ```cmd
-    yarn install
+    npm install
     ```
 
 2. Add license
@@ -33,13 +33,7 @@ Make sure you have [node](https://nodejs.org/), [yarn](https://yarnpkg.com/cli/i
 3. Compiles and hot-reloads for development
 
     ```cmd
-    yarn serve
-    ```
-
-4. Compiles and minifies for production
-
-    ```cmd
-    yarn build
+    npm run serve
     ```
 
 ## Contact Us
