@@ -60,7 +60,8 @@ export const mrzParseTwoLine = (line1: string, line2: string) => {
       birth = "20" + birth;
   }
   birth = birth.slice(0, 4) + "-" + birth.slice(4, 6) + "-" + birth.slice(6);
-  if(/[A-Za-z]/.test(birth)) return false;
+  birth = birth.replace(/\</g, "X");
+  if(/[A-WY-Za-z]/.test(birth)) return false;
   passportMRZ.birth = birth;
   // Get gender information
   let gender = line2[20];
@@ -118,7 +119,8 @@ export const mrzParseThreeLine = (line1: string, line2: string, line3: string) =
   passportMRZ.issuecountry = issueCountry;
   // Get date of birth information
   let birth = line2.substring(0, 6);
-  if(/[A-Za-z]/.test(birth)) return false;
+  birth = birth.replace(/\</g, "X");
+  if(/[A-WY-Za-z]/.test(birth)) return false;
   let date = new Date();
   let currentYear = date.getFullYear();
   if(parseInt(birth.substr(0, 2)) > (currentYear%100)){

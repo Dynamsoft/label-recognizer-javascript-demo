@@ -15,7 +15,6 @@ export default defineComponent({
         const musicUnSelected = require('@/assets/image/music-unselected.svg');
         const camera = require('@/assets/image/camera.svg')
         const addImage = require('@/assets/image/image-files.svg');
-        const screenshotIcon = require('@/assets/image/grey.svg');
         const arrowGreyDown = require('@/assets/image/arrow-grey-down.svg');
         const arrowGreyUp = require('@/assets/image/arrow-grey-up.svg');
         const download = require('@/assets/image/download.svg');
@@ -62,6 +61,11 @@ export default defineComponent({
         // Local upload image recognition
         const uploadImg = async (event:any) => {
             const imgRecognizer = await LabelRecognizer.createInstance({runtimeSettings: runtimeMode.value});
+            if(runtimeMode.value === "mrz") {
+                const settings = JSON.parse(await imgRecognizer.outputRuntimeSettingsToString());
+                settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}"
+                await imgRecognizer.updateRuntimeSettingsFromString(settings, true);
+            }
             try{
                 cameraIsExists.value ? recognizer.value.pauseScanning() : null;
                 bShowImgRecMethodList.value = false;
@@ -127,6 +131,11 @@ export default defineComponent({
         };
         const loadSampleImg = async () => {
             const imgRecognizer = await LabelRecognizer.createInstance({runtimeSettings: runtimeMode.value});
+            if(runtimeMode.value === "mrz") {
+                const settings = JSON.parse(await imgRecognizer.outputRuntimeSettingsToString());
+                settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}"
+                await imgRecognizer.updateRuntimeSettingsFromString(settings, true);
+            }
             try {
                 bShowImgRecMethodList.value = false;
                 cameraIsExists.value ? recognizer.value.pauseScanning() : null;
@@ -269,6 +278,13 @@ export default defineComponent({
                     runtimeMode.value === "mrz" ? document.title = "MRZ Scanner | Dynamsoft Label Recognizer" : document.title = "VIN Scanner (Beta) | Dynamsoft Label Recognizer";
                     recognizer.value.pauseScanning();
                     await recognizer.value.updateRuntimeSettingsFromString(mode);
+                    if (mode === "mrz") {
+                        const settings = JSON.parse(await recognizer.value.outputRuntimeSettingsToString());
+                        settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}"
+                        await recognizer.value.updateRuntimeSettingsFromString(settings, true);
+                    }
+                    console.log(mode);
+                    
                     setRegion();
                     bShowScanningPrompt.value = true;
                     if(timer) {
@@ -299,6 +315,7 @@ export default defineComponent({
             if(bShowModeList.value) return <UpOutlined style={{fontSize: "17px", color: "rgb(170,170,170)", marginLeft: "7px"}}/>
             return <DownOutlined style={{fontSize: "17px", color: "rgb(170,170,170)", marginLeft: "7px"}}/>
         }
+
         return () => (
             <>
                 <div class="content">

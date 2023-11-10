@@ -4,6 +4,7 @@ import Clipboard from "clipboard";
 
 export default defineComponent ({
   setup() {
+    // const recognizer = inject('recognizer') as any;
     const runtimeMode = inject('runtimeMode') as Ref<string>;
     const recognizeResultInfo = inject('recognizeResultInfo') as any;
     const bShowNumOrLetResults = inject('bShowNumOrLetResults') as Ref<boolean>;

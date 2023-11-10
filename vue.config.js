@@ -41,7 +41,7 @@ module.exports = {
                 'clipboard': 'ClipboardJS',
                 'dynamsoft-camera-enhancer': 'Dynamsoft.DCE',
                 'dynamsoft-label-recognizer': 'Dynamsoft.DLR',
-                'dynamsoft-code-parser': 'Dynamsoft.DCP',
+                'dynamsoft-code-parser': 'Dynamsoft.DCP'
             };
         }
     },

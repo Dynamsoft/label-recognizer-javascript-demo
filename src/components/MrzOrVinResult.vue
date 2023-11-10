@@ -68,6 +68,11 @@ export default defineComponent ({
        
         const uploadImg = async (event: any) => {
             const imgRecognizer = await LabelRecognizer.createInstance({runtimeSettings: runtimeMode.value});
+            if(runtimeMode.value === "mrz") {
+                const settings = JSON.parse(await imgRecognizer.outputRuntimeSettingsToString());
+                settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}"
+                await imgRecognizer.updateRuntimeSettingsFromString(settings, true);
+            }
             try{
                 cameraIsExists.value ? recognizer.value.pauseScanning() : null;
                 bShowImgRecMethodList.value = false;
@@ -176,18 +181,20 @@ export default defineComponent ({
         };
         
         const atomicString = () => {
-            return (
-                <div class="raw-string">
-                    {runtimeMode.value === 'mrz' ? "MRZ" : "VIN"} String : 
-                    {
-                        recognizeResultInfo.value.map((item: any, index: number) => {
-                            return (
-                                <div class={'line'+ (index+1)}>{item}</div>
-                            )
-                        })
-                    }    
-                </div>
-            )
+            if(recognizeResultInfo.value.length) {
+                return (
+                    <div class="raw-string">
+                        {runtimeMode.value === 'mrz' ? "MRZ" : "VIN"} String : 
+                        {
+                            recognizeResultInfo.value.map((item: any, index: number) => {
+                                return (
+                                    <div class={'line'+ (index+1)}>{item}</div>
+                                )
+                            })
+                        }    
+                    </div>
+                )
+            }
         }
 
         const copyResults = () => {

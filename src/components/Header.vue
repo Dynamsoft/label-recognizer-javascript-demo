@@ -4,7 +4,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     setup() {
         const dynamsofticon = require('@/assets/image/dynamsoft_logo_orange.png'); // todo: why can't use import
-        const download = require('@/assets/image/download.svg');
+        const download = require('@/assets/image/download.svg')
 
         return () => (
             <>
