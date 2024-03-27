@@ -1,9 +1,9 @@
 <script lang="tsx">
-import { defineComponent, inject, ref, watchEffect, Ref, onBeforeUnmount, getCurrentInstance, onMounted, onBeforeMount } from 'vue';
-import { LabelRecognizer as DLR, DLRLineResult, DLRResult } from 'dynamsoft-label-recognizer';
-import { CameraEnhancer as DCE, DrawingItem } from 'dynamsoft-camera-enhancer';
-import { CodeParser as DCP } from "shen-dynamsoft-code-parser";
-import { mrzParseTwoLine, mrzParseThreeLine } from '../mrz-parser';
+import { defineComponent, inject, ref, Ref, onBeforeUnmount, getCurrentInstance, onMounted, onBeforeMount } from 'vue';
+import { LabelRecognizer, DLRLineResult, DLRResult } from 'dynamsoft-label-recognizer';
+import { CameraEnhancer, DrawingItem, PlayCallbackInfo } from 'dynamsoft-camera-enhancer';
+import { CodeParser } from "dynamsoft-code-parser";
+import { handleParseReuslt } from '../handleMrzAndVinResult';
 import { MobileOutlined } from '@ant-design/icons-vue';
 import NoCameraPage from './NoCameraPage.vue';
 
@@ -22,149 +22,138 @@ const formatModeName = (str: string) => {
   }
 }
 
+export const judgeResolution = (width: number, height: number): "HD" | "FULL HD" => {
+  const minValue = Math.min(width, height);
+  const maxValue = Math.max(width, height);
+  return minValue > 480 && minValue < 960 && maxValue > 960 && maxValue < 1440 ? "HD" : "FULL HD";
+};
+
 export default defineComponent({
   setup() {
-    const screenshotIcon = require('@/assets/image/grey.svg');
     const torchIconClose = require('@/assets/image/torch-icon-close.svg');
     const torchIconOpen = require('@/assets/image/torch-icon-open.svg');
-    const recognizeResultInfo = inject('recognizeResultInfo') as any;
-    const recognizer = inject('recognizer') as Ref<DLR> | any;
-    const cameraEnhancer = inject('cameraEnhancer') as Ref<DCE> | any;
-    const parser = inject('parser') as Ref<DCP> | any;
-    const cameraList = inject('cameraList') as Ref<any>;
-    const bShowResults = inject('bShowResults') as Ref<boolean>;
-    const bShowNumOrLetResults = inject('bShowNumOrLetResults') as Ref<boolean>;
-    const bShowCameraList = inject('bShowCameraList') as Ref<boolean>;
-    const bShowModeList = inject('bShowModeList') as Ref<boolean>;
-    const bShowSettingList = inject('bShowSettingList') as Ref<boolean>;
-    const bShowImgRecMethodList = inject('bShowImgRecMethodList') as Ref<boolean>;
-    const bShowScanningPrompt = inject('bShowScanningPrompt') as Ref<boolean>;
-    const recognizerFrame = inject('recognizerFrame') as Ref<any>;
-    const runtimeMode = inject('runtimeMode') as Ref<string>;
-    const progressRate = inject('progressRate') as Ref<number>;
-    const parseResultInfo = inject('parseResultInfo') as Ref<any>;
-    const bShowMask = inject('bShowMask') as Ref<boolean>;
-    const bNeedPlaySound = inject('bNeedPlaySound') as Ref<boolean>;
-    const setRegion = inject('setRegion') as any;
-    const getImages = inject('getImages') as any;
-    const cameraIsExists = inject('cameraIsExists') as Ref<boolean>;
-    const bOpen = inject('bOpen') as Ref<boolean>;
+    const mrzGuideBox = require('@/assets/image/mrz-guide-box.svg');
+    const recognizeResultInfo: Ref<Array<string>> = inject('recognizeResultInfo')!;
+    const recognizer: Ref<LabelRecognizer | null> = inject('recognizer')!;
+    const cameraEnhancer: Ref<CameraEnhancer | null> = inject('cameraEnhancer')!;
+    const parser: Ref<CodeParser> = inject('parser')!;
+    const cameraList: Ref<Array<{ deviceId: string, label: string }>> = inject('cameraList')!;
+    const cameraId: Ref<string> = inject('cameraId')!;
+    const cameraLabel: Ref<string> = inject('cameraLabel')!;
+    const resolution: Ref<"HD" | "FULL HD"> = inject('resolution')!;
+    const bShowMrzOrVinResult: Ref<boolean> = inject('bShowMrzOrVinResult')!;
+    const bShowNumOrLetResult: Ref<boolean> = inject('bShowNumOrLetResult')!;
+    const bShowCameraList: Ref<boolean> = inject('bShowCameraList')!;
+    const bShowModeList: Ref<boolean> = inject('bShowModeList')!;
+    const bShowSettingList:Ref<boolean> = inject('bShowSettingList')!;
+    const bShowImgRecMethodList: Ref<boolean> = inject('bShowImgRecMethodList')!;
+    const bShowScanningPrompt: Ref<boolean> = inject('bShowScanningPrompt')!;
+    const recognizerFrame: Ref<HTMLImageElement | HTMLCanvasElement> = inject('recognizerFrame')!;
+    const runtimeMode: Ref<string> = inject('runtimeMode')!;
+    const bNeedPlaySound: Ref<boolean> = inject('bNeedPlaySound')!;
+    const cameraIsExists: Ref<boolean> = inject('cameraIsExists')!;
+    const bOpenCamera: Ref<boolean> = inject('bOpenCamera')!;
+    const mrzGuideBoxInset: Ref<string> = inject('mrzGuideBoxInset')!;
+
+    const setRegion: () => void = inject('setRegion')!;
+    const showResult: (parseResult: object, resultArr: Array<string>) => void = inject("showResult")!;
+
+    const bShowScanningText: Ref<boolean> = ref(false);
+    const bShowTorch: Ref<boolean> = ref(document.body.clientWidth < 980);
+    const elRefs: Ref<HTMLDivElement|undefined> = ref();
+    const changeClientTimeoutId: Ref<any> = ref();
+    const bIphone: Ref<Boolean> = ref(true);
+    let video_OnWindowResize: () => Promise<void>;
+
+    const { proxy }: any = getCurrentInstance();
+    const bOpenTorch: Ref<boolean> = ref(false);
+    let bSupportTorch: boolean = true;
+    let bShowScreenShotBtn: boolean = false;
 
     runtimeMode.value = location.pathname.indexOf('vin') === -1 ? 'mrz' : 'vin';
-    runtimeMode.value === "mrz" ? document.title = "MRZ Scanner | Dynamsoft Label Recognizer" : document.title = "VIN Scanner (Beta) | Dynamsoft Label Recognizer";
-
-    const scanningText = ref(false);
-    const bShowTorch = ref(document.body.clientWidth < 980);
-    const elRefs = ref(null);
-    const changeClientTimeoutId = ref() as any;
-    const bIphone = ref(true) as Ref<Boolean>;
-    let video_OnWindowResize: any;
-
-    const { proxy } = getCurrentInstance() as any;
-    const bOpenTorch = ref(false);
-    let timer: any;
-    let bShowScreenShotBtn = false;
-    let bSupportTorch = true;
+    document.title = `${runtimeMode.value === "mrz" ? "MRZ Scanner" : "VIN Scanner (Beta)"} | Dynamsoft Label Recognizer`;
 
     onBeforeMount(async () => {
-      const environment = await DCE.detectEnvironment();
+      const environment = await CameraEnhancer.detectEnvironment();
       cameraIsExists.value = environment.camera;
       bIphone.value = (environment.OS === "iPhone" && environment.version < 17);
     })
 
     onMounted(async () => {
-      parser.value = await DCP.createInstance();
-      runtimeMode.value === "mrz" ? await parser.value.setCodeType(16) : await parser.value.setCodeType(32);
+      parser.value = await CodeParser.createInstance();
       if (cameraIsExists.value) {
-        cameraEnhancer.value = await DCE.createInstance();
-        DLR.onResourcesLoaded = () => { bShowMask.value = false; }
-        DLR.onResourcesLoadProgress = (_?: string, progress?: { loaded: number, total: number }): void => {
-          bShowMask.value = true;
-          progressRate.value = (progress!.loaded / progress!.total) * 100;
-        };
-        await cameraEnhancer.value.setUIElement(elRefs.value);
+        cameraEnhancer.value = await CameraEnhancer.createInstance();
+        cameraEnhancer.value.ifShowScanRegionMask = !(runtimeMode.value === "mrz");
+        cameraEnhancer.value.ifShowScanRegionLaser = !(runtimeMode.value === "mrz");
+        (window as any).dce = cameraEnhancer.value;
+        await cameraEnhancer.value.setUIElement(elRefs.value!);
+        if (resolution.value === "HD") {
+          cameraEnhancer.value.setResolution(1280, 720);
+        } else if (resolution.value === "FULL HD") {
+          cameraEnhancer.value.setResolution(1920, 1080);
+        }
+        cameraEnhancer.value.on("played", (info: PlayCallbackInfo) => {
+          const _cameraLabel = cameraEnhancer.value!.getSelectedCamera().label;
+          const _resolution = judgeResolution(info.width, info.height);
+          if (cameraId.value && (info.deviceId !== cameraId.value || _resolution !== resolution.value)) {
+            proxy.$message.success(`Switched to ${_cameraLabel}(${_resolution}) successfully!`);
+          }
+          cameraId.value = info.deviceId;
+          cameraLabel.value = _cameraLabel;
+          resolution.value = _resolution;
+        });
+
         video_OnWindowResize = async () => {
           changeClientTimeoutId.value && clearTimeout(changeClientTimeoutId.value);
-          cameraEnhancer.value.ifShowScanRegionMask = false;
-          scanningText.value = false;
+          mrzGuideBoxInset.value = "";
+          bShowScanningText.value = false;
           bShowTorch.value = false;
-          recognizer.value.pauseScanning();
+          recognizer.value!.pauseScanning();
           changeClientTimeoutId.value = setTimeout(() => {
             setRegion();
             if (bSupportTorch) bShowTorch.value = document.body.clientWidth < 980;
-            cameraEnhancer.value.ifShowScanRegionMask = true;
-            scanningText.value = true;
-            if (!bShowResults.value) {
-              recognizer.value.resumeScanning();
+            bShowScanningText.value = true;
+            if (!bShowMrzOrVinResult.value) {
+              recognizer.value!.resumeScanning();
             }
           }, 500);
         }
-        recognizer.value = await DLR.createInstance();
-        (window as any).dlr = recognizer.value;
-        await recognizer.value.setImageSource(cameraEnhancer.value, { resultsHighlightBaseShapes: DrawingItem });
-        await recognizer.value.updateRuntimeSettingsFromString(runtimeMode.value);
+        recognizer.value! = await LabelRecognizer.createInstance();
+        (window as any).dlr = recognizer.value!;
+        await recognizer.value!.setImageSource(cameraEnhancer.value, { resultsHighlightBaseShapes: DrawingItem });
+        await recognizer.value!.updateRuntimeSettingsFromString(runtimeMode.value);
         if (runtimeMode.value === "mrz") {
-          const settings = JSON.parse(await recognizer.value.outputRuntimeSettingsToString());
-          settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}"
-          await recognizer.value.updateRuntimeSettingsFromString(settings, true);
+          const settings = JSON.parse(await recognizer.value!.outputRuntimeSettingsToString());
+          settings.LabelRecognizerParameterArray[0].BinarizationModes[1] = { Mode: 'BM_THRESHOLD' };
+          settings.LabelRecognizerParameterArray[0].LineStringRegExPattern = settings.TextAreaArray[0].LineStringRegExPattern = settings.LineSpecificationArray[0].LineStringRegExPattern = "([ACI][A-Z<][A-Z][A-Z<]{2}[A-Z0-9<]{9}[0-9<][A-Z0-9<]{15}){(30)}|([0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z][A-Z<]{2}[A-Z0-9<]{11}[0-9]){(30)}|([A-Z][A-Z<]{29}){(30)}|([ACIV][A-Z<][A-Z][A-Z<]{33}){(36)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{8}){(36)}|(I[A-Z<]FRA[A-Z<]{25}[A-Z0-9<]{6}){(36)}|([A-Z0-9<]{12}[0-9][A-Z<]{14}[0-9]{2}[(01-12)][(01-31)][0-9][MF<][0-9]){(36)}|([PV][A-Z<][A-Z][A-Z<]{41}){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[0-9<][0-9]){(44)}|([A-Z0-9<]{9}[0-9][A-Z][A-Z<]{2}[0-9<]{6}[0-9][MF<][0-9]{2}[(01-12)][(01-31)][0-9][A-Z0-9<]{14}[A-Z0-9<]{2}){(44)}";
+          settings.TextAreaArray[0].FirstPoint = [0, 66];
+          settings.TextAreaArray[0].SecondPoint = [100, 66];
+          await recognizer.value!.updateRuntimeSettingsFromString(settings, true);
         }
         cameraEnhancer.value.setVideoFit('cover');
-        recognizer.value.ifSaveOriginalImageInACanvas = true;
+        recognizer.value!.ifSaveOriginalImageInACanvas = true;
         window.addEventListener('resize', video_OnWindowResize);
 
-        recognizer.value.onImageRead = async (results: DLRResult[]) => {
-          if (results.length !== 0 && (runtimeMode.value === 'number' || runtimeMode.value === 'letter')) {
+        recognizer.value!.onImageRead = (results: DLRResult[]) => {
+          if (results.length !== 0 && ["number", "letter"].includes(runtimeMode.value)) {
             let resultArr: Array<string> = [];
-            results[0].lineResults.forEach((res: any) => {
+            results[0].lineResults.forEach((res: DLRLineResult) => {
               resultArr.push(res.text);
             })
             recognizeResultInfo.value = resultArr;
-            bShowNumOrLetResults.value = true;
+            bShowNumOrLetResult.value = true;
           }
         };
 
-        recognizer.value.onMRZRead = async (_: string, results: DLRLineResult[]) => {
-          recognizerFrame.value = recognizer.value.getOriginalImageInACanvas();
-
-          let resultArr: Array<string> = [];
-          results.forEach((res: any) => {
-            resultArr.push(res.text);
-          })
-          if (resultArr.length === 2) {
-            let parseResultInfo = mrzParseTwoLine(resultArr[0], resultArr[1]);
-            if (parseResultInfo) {
-              await showResults(parseResultInfo, resultArr);
-            } else {
-              recognizer.value.pauseScanning();
-              recognizer.value.resumeScanning();
-            }
-          } else if (resultArr.length === 3) {
-            let parseResultInfo = mrzParseThreeLine(resultArr[0], resultArr[1], resultArr[2]);
-            if (parseResultInfo) {
-              await showResults(parseResultInfo, resultArr);
-            } else {
-              recognizer.value.pauseScanning();
-              recognizer.value.resumeScanning();
-            }
-          }
-        }
-
-        recognizer.value.onVINRead = async (txt: string, result: DLRLineResult) => {
-          recognizerFrame.value = recognizer.value.getOriginalImageInACanvas();
-          let resultArr: Array<string> = [];
-          resultArr.push(txt);
-          bShowResults.value = true;
-          bNeedPlaySound.value && recognizer.value.beepSound.play();
-          recognizeResultInfo.value = resultArr;
-          recognizer.value.pauseScanning();
-        }
+        recognizer.value!.onMRZRead = callbackMrzOrVinRecognition;
+        recognizer.value!.onVINRead = callbackMrzOrVinRecognition;
 
         await recognizer.value.startScanning(false);
-        bOpen.value = true;
+        bOpenCamera.value = true;
         setRegion();
         bShowScreenShotBtn = true;
         cameraList.value = await cameraEnhancer.value.getAllCameras();
-        scanningText.value = true;
+        bShowScanningText.value = true;
         if (document.body.clientWidth < 980 && runtimeMode.value === 'mrz') {
           proxy.$message.open({
             content: 'Rotate your device',
@@ -175,34 +164,33 @@ export default defineComponent({
       }
     })
 
-    const showResults = async (parseResult: object, resultArr: Array<string>) => {
-      recognizeResultInfo.value = resultArr;
-      clearTimeout(timer);
-      bShowScanningPrompt.value = false;
-      parseResultInfo.value = parseResult;
-      bNeedPlaySound.value && recognizer.value.beepSound.play();
-      bShowResults.value = true;
-      recognizer.value.pauseScanning();
+    const callbackMrzOrVinRecognition = async (text: string, results: DLRLineResult[] | DLRLineResult) => {
+      recognizerFrame.value = recognizer.value!.getOriginalImageInACanvas();
+      let resultArr: Array<string> = [];
+      if(runtimeMode.value === "mrz") {
+        (results as DLRLineResult[]).forEach((res: any) => {
+          resultArr.push(res.text);
+        })
+      } else if(runtimeMode.value === "vin") {
+        resultArr.push(text);
+      }
+      let parseResultInfo = await parser.value.parse(resultArr.join(""));
+      parseResultInfo = handleParseReuslt(parseResultInfo, runtimeMode.value);
+      if (JSON.stringify(parseResultInfo) === "{}") {
+        proxy.$message.error('Parse Failed!');
+      }
+      showResult(parseResultInfo, resultArr);
+      bNeedPlaySound.value && recognizer.value!.beepSound.play();
+      recognizer.value!.pauseScanning();
     }
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', video_OnWindowResize);
-      if (cameraIsExists.value) {
-        cameraEnhancer.value.dispose();
-        recognizer.value.destroyContext();
-        cameraEnhancer.value = null;
-        recognizer.value = null;
-      }
+      cameraEnhancer.value?.dispose(false);
+      recognizer.value?.destroyContext();
+      cameraEnhancer.value = null;
+      recognizer.value = null;
     })
-
-    watchEffect(() => {
-      if (!bShowMask.value) {
-        bShowScanningPrompt.value = true;
-        timer = setTimeout(() => {
-          bShowScanningPrompt.value = false;
-        }, 5000)
-      }
-    });
 
     const closeAllList = () => {
       bShowCameraList.value = false;
@@ -214,10 +202,10 @@ export default defineComponent({
     const openTorch = async () => {
       try {
         if (bOpenTorch.value) {
-          await cameraEnhancer.value.turnOffTorch();
+          await cameraEnhancer.value!.turnOffTorch();
           bOpenTorch.value = false;
         } else {
-          await cameraEnhancer.value.turnOnTorch();
+          await cameraEnhancer.value!.turnOnTorch();
           bOpenTorch.value = true;
         }
       } catch (ex: any) {
@@ -230,20 +218,13 @@ export default defineComponent({
 
     return () => (
       <>
-        <div class="scanningPrompt" v-show={bShowScanningPrompt.value && scanningText.value}>
-          <div v-show={runtimeMode.value === 'mrz'}>
-            <div>P&lt;CANAMAN&lt;&lt;RITA&lt;TANIA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
-            <div>ERE82721&lt;9CAN8412072M2405251&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;04</div>
-          </div>
-          <div v-show={runtimeMode.value === 'vin'}>
-            <div>2C4RDGCG0FR805928</div>
-          </div>
-          <div v-show={runtimeMode.value === 'letter'}>
-            <div>ABCDEFGHIJK....</div>
-          </div>
-          <div v-show={runtimeMode.value === 'number'}>
-            <div>123456789...</div>
-          </div>
+        <div class="scanningPrompt" v-show={bShowScanningPrompt.value && bShowScanningText.value}>
+            <div v-show={runtimeMode.value === 'vin'}>2C4RDGCG0FR805928</div>
+            <div v-show={runtimeMode.value === 'letter'}>ABCDEFGHIJK....</div>
+            <div v-show={runtimeMode.value === 'number'}>123456789...</div>
+        </div>
+        <div class="div-mrz-guide-box-container" v-show={runtimeMode.value === 'mrz' && mrzGuideBoxInset.value} style={{ inset: mrzGuideBoxInset.value }}>
+          <img src={mrzGuideBox} class="mrz-guide-box" />
         </div>
         {cameraIsExists.value ? (
           <div class="container" ref={elRefs} onClick={closeAllList}>
@@ -251,7 +232,7 @@ export default defineComponent({
             <svg class="dce-bg-camera" viewBox="0 0 2048 1792"><path d="M1024 672q119 0 203.5 84.5t84.5 203.5-84.5 203.5-203.5 84.5-203.5-84.5-84.5-203.5 84.5-203.5 203.5-84.5zm704-416q106 0 181 75t75 181v896q0 106-75 181t-181 75h-1408q-106 0-181-75t-75-181v-896q0-106 75-181t181-75h224l51-136q19-49 69.5-84.5t103.5-35.5h512q53 0 103.5 35.5t69.5 84.5l51 136h224zm-704 1152q185 0 316.5-131.5t131.5-316.5-131.5-316.5-316.5-131.5-316.5 131.5-131.5 316.5 131.5 316.5 316.5 131.5z" /></svg>
             <div class="dce-video-container"></div>
             <div class="dce-scanarea">
-              <div class="scanningText" v-show={scanningText.value} style={{ top: runtimeMode.value === 'mrz' ? '-20%' : '-35%' }}>{`Align the frame within the ${formatModeName(runtimeMode.value)} and start scanning`}</div>
+              <div class="bShowScanningText" v-show={bShowScanningText.value} style={{ top: runtimeMode.value === 'mrz' ? '-10%' : '-35%' }}>{`Align the frame within the ${formatModeName(runtimeMode.value)} and start scanning`}</div>
               <div class="dce-scanlight" style="display: none"></div>
               <img src={torchIconClose} class="torch-icon" v-show={bShowTorch.value && !bOpenTorch.value && !bIphone.value} onClick={openTorch} />
               <img src={torchIconOpen} class="torch-icon" v-show={bShowTorch.value && bOpenTorch.value} onClick={openTorch} />
@@ -302,6 +283,7 @@ export default defineComponent({
   min-height: 100px;
   background: #eee;
   position: relative;
+  overflow: hidden;
 }
 
 .dce-bg-loading {
@@ -362,6 +344,7 @@ export default defineComponent({
   left: 50%;
   bottom: 10%;
   transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .dlr-msg-poweredby svg {
@@ -369,7 +352,7 @@ export default defineComponent({
   fill: #FFFFFF;
 }
 
-.scanningText {
+.bShowScanningText {
   position: absolute;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -421,6 +404,17 @@ export default defineComponent({
   }
 }
 
+.div-mrz-guide-box-container {
+  position: absolute;
+  z-index: 998;
+  pointer-events: none;
+
+  .mrz-guide-box {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .video-container {
   position: relative;
   display: flex;
@@ -436,7 +430,7 @@ export default defineComponent({
     display: none;
   }
 
-  .scanningText {
+  .bShowScanningText {
     font-size: 18px;
   }
 
@@ -451,4 +445,5 @@ export default defineComponent({
   .dlr-msg-poweredby {
     bottom: 12%;
   }
-}</style>
+}
+</style>../handleMrzAndVinResult

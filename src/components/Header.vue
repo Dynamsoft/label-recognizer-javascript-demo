@@ -1,15 +1,16 @@
 <script lang="tsx">
 import { defineComponent } from 'vue';
-
+import { linkToDynamsoftHomePage } from '@/util';
+ 
 export default defineComponent({
     setup() {
         const dynamsofticon = require('@/assets/image/dynamsoft_logo_orange.png'); // todo: why can't use import
-        const download = require('@/assets/image/download.svg')
+        const download = require('@/assets/image/download.svg');
 
         return () => (
             <>
                 <div class="header">
-                    <img src={ dynamsofticon } alt="logo" class="dynamsoft-icon"/>
+                    <img src={ dynamsofticon } alt="logo" class="dynamsoft-icon" onClick={linkToDynamsoftHomePage} />
                     <div class="getCode"><a href="https://github.com/Dynamsoft/label-recognizer-javascript-demo" target="_blank">
                         Get Source Code
                         <img src={download} class="download-icon"/>

@@ -1,16 +1,18 @@
 <script lang="tsx">
-import { defineComponent } from 'vue'
+import { defineComponent } from 'vue';
+import {linkToDynamsoftHomePage} from "../util"
 
 export default defineComponent({
     setup() {
         const dynamsofticon = require('@/assets/image/dynamsoft_logo_orange.png');
+
         return () => (
             <>
                 <div class="footer">
                     <div class="footer-content">
-                        <img src={dynamsofticon}/>
+                        <img src={dynamsofticon} onClick={linkToDynamsoftHomePage}/>
                         <span>
-                            © 2003 - 2023 Dynamsoft. All rights reserved. 
+                            © 2003 - {new Date().getUTCFullYear()} Dynamsoft. All rights reserved. 
                             <a href="https://www.dynamsoft.com/PrivacyStatement.aspx"> Privacy Statement </a>
                             /
                             <a href="https://www.dynamsoft.com/SiteMap.aspx"> Site Map</a>
@@ -51,6 +53,7 @@ export default defineComponent({
                 height: 60%;
                 margin-right: 45px;
                 vertical-align: middle;
+                cursor: pointer;
             }
             span {
                 font-size: 16px;

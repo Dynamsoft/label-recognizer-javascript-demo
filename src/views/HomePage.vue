@@ -1,16 +1,16 @@
 <script lang="tsx">
-import { defineComponent, ref } from 'vue';
+import { Ref, defineComponent, ref } from 'vue';
 import { CheckOutlined } from '@ant-design/icons-vue';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
-import { useRouter } from "vue-router";
+import { Router, useRouter } from "vue-router";
 
 export default defineComponent({
     setup() {
         const mrzIcon = require('@/assets/image/mrz-icon.svg');
         const dlrLogoIcon = require('@/assets/image/dlr-logo-icon.svg');
-        const selected = ref('mrz');
-        const router = useRouter();
+        const selected: Ref<string> = ref('mrz');
+        const router: Router = useRouter();
 
         // Select the operation mode and go to the recognition page
         // if PC, when choose a mode, enter directly.
@@ -90,7 +90,7 @@ export default defineComponent({
                     </div>
                 </div>
                 <div class="support-content">
-                    <div>Supported Browsers: Safari v11+, Chrome v59+, Firefox 55+ and Edge v16+ on Desktop/Android/iOS.</div>
+                    <div>Supported Browsers: Safari v14+, Chrome v78+, Firefox 62+ and Edge v79+ on Desktop/Android/iOS.</div>
                 </div>
                 <Footer />
             </>

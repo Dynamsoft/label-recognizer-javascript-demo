@@ -2,55 +2,54 @@
 import { defineComponent, inject, watch, ref, getCurrentInstance, Ref } from 'vue'
 import Clipboard from "clipboard";
 
-export default defineComponent ({
+export default defineComponent({
   setup() {
-    // const recognizer = inject('recognizer') as any;
-    const runtimeMode = inject('runtimeMode') as Ref<string>;
-    const recognizeResultInfo = inject('recognizeResultInfo') as any;
-    const bShowNumOrLetResults = inject('bShowNumOrLetResults') as Ref<boolean>;
+    const runtimeMode: Ref<string> = inject('runtimeMode')!;
+    const recognizeResultInfo: Ref<Array<string>> = inject('recognizeResultInfo')!;
+    const bShowNumOrLetResult: Ref<boolean> = inject('bShowNumOrLetResult')!;
 
-    const bCopied = ref(false);
-    const recognizerCount = ref(0);
+    const bCopied: Ref<boolean> = ref(false);
+    const recognizerCount: Ref<number> = ref(0);
     const { proxy }: any = getCurrentInstance();
     let timer: any;
-    let currentRes = '';
+    let currentRes: string = '';
 
     watch(recognizeResultInfo, () => {
-      if(currentRes !== recognizeResultInfo.value[0]) {
+      if (currentRes !== recognizeResultInfo.value[0]) {
         recognizerCount.value = 0;
       }
       currentRes = recognizeResultInfo.value[0];
       timer && clearTimeout(timer);
       recognizerCount.value++;
       timer = setTimeout(() => {
-        bShowNumOrLetResults.value = false;
+        bShowNumOrLetResult.value = false;
       }, 5000)
-    }, {immediate: true})
+    }, { immediate: true })
 
     const copyResults = () => {
-      if(!bCopied.value) {
-          let clipboard = new Clipboard('.copy-btn', {
-              text: (): string => {
-                let copyContent = '';
-                recognizeResultInfo.value.map((item: string) => {
-                  copyContent += item + '\n';
-                })
-                return copyContent;
-              }
-          });
-          clipboard.on('success', () => {
-              proxy.$message.success('Copied!');
-              bCopied.value = true;
-              setTimeout(() => {
-                bCopied.value = false;
-              }, 5000)
-              clipboard.destroy();
-          });
-          clipboard.on('error', () => {
-              proxy.$message.error('Failed!');
-              clipboard.destroy();
-          })
-      }   
+      if (!bCopied.value) {
+        let clipboard = new Clipboard('.copy-btn', {
+          text: (): string => {
+            let copyContent = '';
+            recognizeResultInfo.value.map((item: string) => {
+              copyContent += item + '\n';
+            })
+            return copyContent;
+          }
+        });
+        clipboard.on('success', () => {
+          proxy.$message.success('Copied!');
+          bCopied.value = true;
+          setTimeout(() => {
+            bCopied.value = false;
+          }, 5000)
+          clipboard.destroy();
+        });
+        clipboard.on('error', () => {
+          proxy.$message.error('Failed!');
+          clipboard.destroy();
+        })
+      }
     }
 
     return () => (
@@ -63,7 +62,7 @@ export default defineComponent ({
             })
           }
         </div>
-        <div class="copy-btn" style={{color: !bCopied.value ? '#FE8E14' : 'gray', cursor: !bCopied.value ? 'pointer' : ''}} onClick={ copyResults }>{bCopied.value ? 'Copied' : 'Copy'}</div>
+        <div class="copy-btn" style={{ color: !bCopied.value ? '#FE8E14' : 'gray', cursor: !bCopied.value ? 'pointer' : '' }} onClick={copyResults}>{bCopied.value ? 'Copied' : 'Copy'}</div>
         <div>{recognizerCount.value}X</div>
       </div>
     )
@@ -88,12 +87,14 @@ export default defineComponent ({
   color: #dddddd;
   font-size: 18px;
   padding: 0 15px;
+
   .content {
     width: 50%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   .copy-btn {
     color: #fe8e14;
   }

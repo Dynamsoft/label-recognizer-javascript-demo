@@ -1,17 +1,17 @@
 <script lang="tsx">
 import { defineComponent, provide, ref, Ref } from 'vue';
 import { LabelRecognizer } from 'dynamsoft-label-recognizer';
-import './dlr.ts'
-import './dce.ts'
-import './dcp.ts'
+import './dlr'
+import './dce'
+import './dcp'
 
 export default defineComponent({
   setup() {
-    const isShowHomePage = ref(true) as Ref<boolean>;
-    const runtimeMode = ref('') as Ref<string>;
-    const bShowMask = ref(false) as Ref<boolean>;
-    const bShowImgRecognitionMask = ref(false) as Ref<boolean>;
-    const progressRate = ref() as Ref<number>;
+    const isShowHomePage: Ref<boolean> = ref(true);
+    const runtimeMode: Ref<string> = ref("mrz");
+    const bShowMask: Ref<boolean> = ref(false);
+    const bShowImgRecognitionMask: Ref<boolean> = ref(false);
+    const progressRate: Ref<number> = ref(0);
 
     provide('isShowHomePage', isShowHomePage);
     provide('runtimeMode', runtimeMode);
@@ -19,15 +19,17 @@ export default defineComponent({
     provide('progressRate', progressRate);
     provide('bShowImgRecognitionMask', bShowImgRecognitionMask);
 
-    LabelRecognizer.loadWasm();
+    LabelRecognizer.onResourcesLoadStarted = () => { bShowMask.value = true; }
+    LabelRecognizer.onResourcesLoadProgress = (_?: string, progress?: { loaded: number, total: number }): void => {
+      progressRate.value = (progress!.loaded / progress!.total) * 100;
+    };
+    LabelRecognizer.onResourcesLoaded = () => { bShowMask.value = false; }
 
     return () => (
       <>
         <router-view></router-view>
-        { /* isShowHomePage.value ? <HomePage /> : <RecognizerPage /> */ }
         <div class="dataLoadingMask" v-show={bShowMask.value}>
           <div>Model Loading......</div>
-          <progress class="loadProgress" value={progressRate.value} max={100}></progress>
         </div>
         <div class="imgRecognitionMask" v-show={bShowImgRecognitionMask.value}>
           <div>recognizing...</div>
@@ -158,7 +160,7 @@ img {
     }
     
   }
-  #comm100-float-button-2 {
+  [id*=comm100-float-button] {
     display: none !important;
     width: 1px !important;
     height: 1px !important;
