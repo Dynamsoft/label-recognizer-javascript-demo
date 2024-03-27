@@ -30,6 +30,12 @@ Make sure you have [node](https://nodejs.org/), [yarn](https://yarnpkg.com/cli/i
     LabelRecognizer.license = 'YOUR LICENSE';
     ```
 
+    Open `src/dcp.ts` and input your license key in this line:
+    
+    ```ts
+    LicenseManager.initLicense('YOUR LICENSE');
+    ```
+
 3. Compiles and hot-reloads for development
 
     ```cmd
